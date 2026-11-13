@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoSE Mycoponic Chamber — 3D-Printable MVP</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #111827;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --green: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    header {
+      padding: 48px 24px 32px;
+      max-width: 1180px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
+    .subtitle { color: var(--muted); max-width: 680px; margin-top: 8px; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      display: inline-block;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      color: #fff;
+      background: var(--accent);
+      border: 1px solid #60a5fa;
+    }
+    .btn.secondary { background: var(--card); border-color: var(--border); color: var(--text); }
+    main { max-width: 1180px; margin: 0 auto; padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 48px; }
+    h2 { font-size: 1.35rem; margin-bottom: 16px; color: #f8fafc; }
+    .viewer-frame {
+      width: 100%;
+      height: 640px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #0f172a;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card h3 { font-size: 1rem; color: #f8fafc; }
+    .card p { font-size: 0.9rem; color: var(--muted); flex: 1; }
+    .meta { font-size: 0.8rem; color: var(--green); font-weight: 600; }
+    .dl {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #93c5fd;
+      text-decoration: none;
+    }
+    .dl:hover { text-decoration: underline; }
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>CoSE Mycoponic Chamber — MVP</h1>
+      <p class="subtitle">
+        A pragmatic, 3D-printable single-chamber bioreactor built around an off-the-shelf
+        <strong>85 × 90 × 100 mm clear acrylic tube</strong> and a <strong>4-inch ceramic filter candle</strong>,
+        with Luer syringe-filter gas exchange, humid air &amp; sensor ports, and a funneling drain base.
+      </p>
+    </div>
+    <div class="pill-row">
+      <a class="btn" href="viewer.html" target="_blank">Open Fullscreen 3D Viewer</a>
+      <a class="btn secondary" href="#variants">Download STLs</a>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>Interactive Orthographic 3D Assembly (with 50 mL &amp; 10 mL Syringes)</h2>
+      <iframe class="viewer-frame" src="viewer.html" title="Interactive 3D Orthographic Assembly"></iframe>
+    </section>
+
+    <section>
+      <h2>How It Functions</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="meta">1. Nutrient Feed (Top)</div>
+          <h3>50 mL Syringe &rarr; Ceramic Candle</h3>
+          <p>A 50 mL (or 25 mL) syringe feeds liquid nutrients into the hollow stem of the 4-inch ceramic candle, weeping radially outward through the porous wall.</p>
+        </div>
+        <div class="card">
+          <div class="meta">2. Controlled Headspace</div>
+          <h3>Humid Air, Sensor &amp; Syringe Filter</h3>
+          <p>An external pump pushes humidified air into the 6.0 mm inlet, a probe hangs through the 8.0 mm port, and exhaust vents through a 0.22 &mu;m Luer syringe filter.</p>
+        </div>
+        <div class="card">
+          <div class="meta">3. Gravity Sump</div>
+          <h3>38.5&deg; Conical Funnel &amp; Drain</h3>
+          <p>Excess exudate/nutrients drip off the candle into the 38.5&deg; funnel and exit horizontally through a 1/4&quot; drain barb (20 mm off the bench) to an inline valve.</p>
+        </div>
+        <div class="card">
+          <div class="meta">4. Electronics &amp; Collection</div>
+          <h3>Arched Bays &amp; 10 mL Syringe Cradle</h3>
+          <p>Three smooth arched bays under the funnel house Arduinos/sensors (M3 holes), while twin C-clips hold a 10 mL collection syringe flush at the base edge.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="variants">
+      <h2>Printable Variants &amp; STL Downloads (Support-Free PETG)</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="meta">48.6 cm&sup3; &bull; Print Upside-Down</div>
+          <h3>Standard Slide-On Lid</h3>
+          <p>90.5 mm ID skirt, Ø58.5 mm top-drop candle collar pocket, Luer filter socket, 6 mm air port, 8 mm sensor port, and 3× tower sockets.</p>
+          <a class="dl" href="stl/mvp_top_lid.stl" download>Download mvp_top_lid.stl</a>
+        </div>
+        <div class="card">
+          <div class="meta">10.0 cm&sup3; &bull; Print Flat</div>
+          <h3>Candle Drop-In Collar</h3>
+          <p>Ø58 mm retention flange that bolts onto the candle stem in the open and drops into the lid pocket so the candle cannot fall.</p>
+          <a class="dl" href="stl/mvp_candle_collar.stl" download>Download mvp_candle_collar.stl</a>
+        </div>
+        <div class="card">
+          <div class="meta">22.1 cm&sup3; / 25.1 cm&sup3; &bull; Support-Free</div>
+          <h3>Glue-On Syringe Cages (50 mL &amp; 25 mL)</h3>
+          <p>4-pillar central shaft cages with Ø28 mm wing-nut clearance that glue onto the candle collar after assembly.</p>
+          <a class="dl" href="stl/mvp_syringe_cage_addon.stl" download>Download 50 mL (mvp_syringe_cage_addon.stl)</a>
+          <a class="dl" href="stl/mvp_syringe_cage_addon_25ml.stl" download>Download 25 mL (mvp_syringe_cage_addon_25ml.stl)</a>
+        </div>
+        <div class="card">
+          <div class="meta">114.6 cm&sup3; / 76.5 cm&sup3; &bull; Support-Free</div>
+          <h3>Full &amp; Half-Height Syringe Towers</h3>
+          <p>3-pillar open-ring plug-in stands (165 mm full or 82.5 mm half height) that seat into the 3 sockets on the standard lid.</p>
+          <a class="dl" href="stl/mvp_syringe_tower_addon.stl" download>Download Full (mvp_syringe_tower_addon.stl)</a>
+          <a class="dl" href="stl/mvp_syringe_tower_addon_half.stl" download>Download Half (mvp_syringe_tower_addon_half.stl)</a>
+        </div>
+        <div class="card">
+          <div class="meta">209.9 cm&sup3; &bull; Print Upright</div>
+          <h3>Standard Arched Sump Base</h3>
+          <p>38.5&deg; funnel, 20 mm side-exit 1/4&quot; drain barb, and 3 wide arched electronics bays with M3 mounting holes.</p>
+          <a class="dl" href="stl/mvp_bottom_base.stl" download>Download mvp_bottom_base.stl</a>
+        </div>
+        <div class="card">
+          <div class="meta">212.8 cm&sup3; &bull; Print Upright</div>
+          <h3>Collection Syringe Base</h3>
+          <p>Adds twin Ø16.4 mm snap-in C-clips at R = 47.5 mm to hold a 10 mL collection syringe flush against the base.</p>
+          <a class="dl" href="stl/mvp_bottom_base_collection.stl" download>Download mvp_bottom_base_collection.stl</a>
+        </div>
+        <div class="card">
+          <div class="meta">21.2 cm&sup3; &bull; ~15 Min Print</div>
+          <h3>Calibration Fit-Test Coupon</h3>
+          <p>Tests the 90.5 mm tube fit, 51.5 mm candle bore, Luer syringe filter, 6 mm air tube, and M3 screw tap before full printing.</p>
+          <a class="dl" href="stl/mvp_fit_test_coupon.stl" download>Download mvp_fit_test_coupon.stl</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    CoSE (Collaborative Open Science &amp; Exploration) &bull; Parametric build123d CAD
+  </footer>
+</body>
+</html>
