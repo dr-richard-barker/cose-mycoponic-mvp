@@ -528,6 +528,44 @@ def mvp_syringe_cage_addon_25ml():
     return _syringe_cage_addon(p.CAGE_25ML_ID)
 
 
+def mvp_cage_retainer_ring():
+    """Support-free 3-arm retainer ring that slides down over the 45-deg slanted
+    base of the syringe cage ('net') and plugs into the 3x Ø14.5 mm circular
+    indents on mvp_top_lid. Print upside-down (flat top on build plate).
+    """
+    z_bot = p.Z_LID_TOP + 5.0
+    z_top = p.Z_LID_TOP + 13.0
+    h_ring = z_top - z_bot  # 8.0 mm
+    r_out = 30.0            # 60.0 mm OD (clears all 3 outer ports at R = 35.5 mm)
+
+    ring_outer = Pos(0, 0, z_bot) * Cylinder(
+        r_out, h_ring, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    ring_inner = _frustum(27.5, 19.5, h_ring + 0.2, z_bot - 0.1)
+    retainer = ring_outer - ring_inner
+
+    # 3 radial arms at 60/180/300 deg with downward Ø14.0 mm plug-in pins
+    z_pin_bot = p.Z_LID_TOP - 4.2
+    pin_total_h = z_top - z_pin_bot
+    arm_len = (p.LID_OD / 2.0) - (r_out - 2.0)
+    r_arm_mid = (p.LID_OD / 2.0 + (r_out - 2.0)) / 2.0
+
+    for deg in (60.0, 180.0, 300.0):
+        arm = Rot(0, 0, deg) * Pos(r_arm_mid, 0, z_bot) * Box(
+            arm_len, 16.0, h_ring, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        px = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
+        py = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
+        pin = Pos(px, py, z_pin_bot) * Cylinder(
+            p.SYRINGE_PILLAR_DIA / 2.0,
+            pin_total_h,
+            align=(Align.CENTER, Align.CENTER, Align.MIN),
+        )
+        retainer = retainer + arm + pin
+
+    return retainer
+
+
 def mvp_fit_test_coupon():
     """15-minute 8 mm tall calibration coupon testing all critical tolerances:
       - 90.5 mm ID outer ring (Uxcell tube OD slide-fit)
