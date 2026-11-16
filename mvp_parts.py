@@ -19,9 +19,11 @@ from build123d import (
     Cylinder,
     Locations,
     Plane,
+    Polygon,
     Pos,
     Rot,
     chamfer,
+    extrude,
 )
 
 import mvp_params as p
@@ -564,6 +566,47 @@ def mvp_cage_retainer_ring():
         retainer = retainer + arm + pin
 
     return retainer
+
+
+def _syringe_cage_snap(cage_id: float):
+    """Single-piece snap-on syringe cage ('net') with 3-arm pin adapter and
+    45-deg support-free gussets built directly into the base. Print upside-down.
+    """
+    cage = _syringe_cage_addon(cage_id)
+    r_base_out = p.CAGE_ADDON_BASE_OD / 2.0
+    arm_len = (p.LID_OD / 2.0) - (r_base_out - 2.0)
+    r_arm_mid = (p.LID_OD / 2.0 + (r_base_out - 2.0)) / 2.0
+    z0 = p.Z_LID_TOP
+    z_pin_bot = z0 - 4.2
+
+    for deg in (60.0, 180.0, 300.0):
+        arm = Rot(0, 0, deg) * Pos(r_arm_mid, 0, z0) * Box(
+            arm_len, 16.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        px = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
+        py = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
+        pin = Pos(px, py, z_pin_bot) * Cylinder(
+            p.SYRINGE_PILLAR_DIA / 2.0,
+            8.2,
+            align=(Align.CENTER, Align.CENTER, Align.MIN),
+        )
+        # 45-deg support-free gusset rib from (R=26, Z=+26) down to (R=49, Z=+3)
+        gusset_prof = Polygon((26.0, 0.0), (49.0, 0.0), (26.0, 23.0), align=None)
+        gusset_3d = Pos(0, 0, z0 + 3.0) * Rot(90, 0, 0) * extrude(gusset_prof, amount=3.0, both=True)
+        gusset = Rot(0, 0, deg) * gusset_3d
+        cage = cage + arm + pin + gusset
+
+    return cage
+
+
+def mvp_syringe_cage_snap():
+    """Single-piece snap-on 50 mL syringe cage (Ø32.0 mm ID)."""
+    return _syringe_cage_snap(p.CAGE_ID)
+
+
+def mvp_syringe_cage_snap_25ml():
+    """Single-piece snap-on 25 mL syringe cage (Ø23.5 mm ID)."""
+    return _syringe_cage_snap(p.CAGE_25ML_ID)
 
 
 def mvp_fit_test_coupon():

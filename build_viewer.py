@@ -24,6 +24,8 @@ PARTS_META = [
     ("mvp_syringe_cage_addon", "Glue-On 50 mL Syringe Cage", "#fbbf24", 1.0, 3.5),
     ("mvp_syringe_cage_addon_25ml", "Glue-On 25 mL Syringe Cage", "#f59e0b", 1.0, 3.5),
     ("mvp_cage_retainer_ring", "Snap-In Cage Retainer Ring", "#ec4899", 1.0, 4.2),
+    ("mvp_syringe_cage_snap", "Snap-On 50 mL Net (1-Piece)", "#f97316", 1.0, 3.5),
+    ("mvp_syringe_cage_snap_25ml", "Snap-On 25 mL Net (1-Piece)", "#ea580c", 1.0, 3.5),
     ("mvp_candle_ref", "4-in Ceramic Filter Candle", "#e2e8f0", 1.0, 3.0),
     ("mvp_syringe_50ml_ref", "50 mL Nutrient Feed Syringe", "#bae6fd", 0.42, 4.0),
     ("mvp_syringe_10ml_ref", "10 mL Collection Syringe", "#bae6fd", 0.42, 0.0),
@@ -169,10 +171,10 @@ def main():
     <div class="group">
       <div class="group-title">Configuration Presets</div>
       <div class="btn-grid">
-        <button id="preset-cage50" class="active">50 mL Glue-On</button>
-        <button id="preset-cage25">25 mL Glue-On</button>
+        <button id="preset-snap50" class="active">Snap-On 50 mL Net</button>
+        <button id="preset-cage50">50 mL + Retainer</button>
+        <button id="preset-cage25">25 mL + Retainer</button>
         <button id="preset-tower">Full Tower</button>
-        <button id="preset-half">Half Adapter</button>
       </div>
     </div>
 
@@ -291,7 +293,10 @@ def main():
         "mvp_syringe_tower_addon_half",
         "mvp_bottom_base",
         "mvp_top_lid_syringe_cage",
+        "mvp_syringe_cage_addon",
         "mvp_syringe_cage_addon_25ml",
+        "mvp_cage_retainer_ring",
+        "mvp_syringe_cage_snap_25ml",
       ];
       if (hiddenByDefault.includes(name)) mesh.visible = false;
 
@@ -338,10 +343,10 @@ def main():
       }}
     }}
     const common = ["mvp_bottom_base_collection", "mvp_tube_ref", "mvp_candle_ref", "mvp_candle_collar", "mvp_syringe_50ml_ref", "mvp_syringe_10ml_ref"];
+    document.getElementById("preset-snap50").onclick = () => applyPreset("preset-snap50", [...common, "mvp_top_lid", "mvp_syringe_cage_snap"]);
     document.getElementById("preset-cage50").onclick = () => applyPreset("preset-cage50", [...common, "mvp_top_lid", "mvp_syringe_cage_addon", "mvp_cage_retainer_ring"]);
     document.getElementById("preset-cage25").onclick = () => applyPreset("preset-cage25", [...common, "mvp_top_lid", "mvp_syringe_cage_addon_25ml", "mvp_cage_retainer_ring"]);
     document.getElementById("preset-tower").onclick = () => applyPreset("preset-tower", [...common, "mvp_top_lid_syringe_tower"]);
-    document.getElementById("preset-half").onclick = () => applyPreset("preset-half", [...common, "mvp_top_lid", "mvp_syringe_tower_addon_half"]);
 
     const explodeSlider = document.getElementById("explode");
     const expVal = document.getElementById("exp-val");
