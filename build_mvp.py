@@ -69,7 +69,7 @@ def main():
 
         mesh = trimesh.load(stl_path, force="mesh")
         watertight = mesh.is_watertight
-        bodies = len(mesh.split(only_watertight=False))
+        bodies = len(shape.solids())
         vol_cm3 = mesh.volume / 1000.0
         ok_mesh = watertight and (bodies == 1)
         status = "OK (watertight)" if ok_mesh else f"FAIL (wt={watertight}, bodies={bodies})"

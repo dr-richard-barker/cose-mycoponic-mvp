@@ -481,11 +481,11 @@ def mvp_syringe_tower_addon_half():
     return _syringe_tower_addon(p.SYRINGE_TOWER_HALF_HEIGHT)
 
 
-def _syringe_cage_addon(cage_id: float):
+def _syringe_cage_addon(cage_id: float, rib_angles=(45.0, 135.0, 225.0, 315.0), rib_width: float = p.CAGE_RIB_WIDTH):
     """Shared builder for 100% support-free glue-on central syringe cage.
 
     Sits flush on top of mvp_candle_collar (Z = Z_LID_TOP, Ø58 mm OD, Ø28 mm
-    wing-nut clearance) with a 45-deg self-supporting flare into the 4-pillar
+    wing-nut clearance) with a 45-deg self-supporting flare into the vertical
     central cage. Print upside-down (top ring on bed) with zero supports.
     """
     r_in = cage_id / 2.0
@@ -510,10 +510,9 @@ def _syringe_cage_addon(cage_id: float):
 
     rib_h = (z_top_ring - z_cage_start) + 2.0
     cage = collar_base + top_ring
-    for i in range(p.CAGE_NUM_RIBS):
-        ang = 45.0 + i * (360.0 / p.CAGE_NUM_RIBS)
+    for ang in rib_angles:
         rib = Rot(0, 0, ang) * Pos(r_mid, 0, z_cage_start - 1.0) * Box(
-            p.CAGE_WALL, p.CAGE_RIB_WIDTH, rib_h, align=(Align.CENTER, Align.CENTER, Align.MIN)
+            p.CAGE_WALL, rib_width, rib_h, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
         cage = cage + rib
 
@@ -569,17 +568,22 @@ def mvp_cage_retainer_ring():
 
 
 def _syringe_cage_snap(cage_id: float):
-    """Single-piece snap-on syringe cage ('net') with 3-arm pin adapter and
-    45-deg support-free gussets built directly into the base. Print upside-down.
+    """Single-piece snap-on syringe cage ('net') with 3 vertical struts aligned
+    at 60/180/300 deg to join seamlessly with the 45-deg triangular gussets and
+    3-pin wings. Print upside-down (zero supports).
     """
-    cage = _syringe_cage_addon(cage_id)
+    wing_angles = (60.0, 180.0, 300.0)
+    cage = _syringe_cage_addon(cage_id, rib_angles=wing_angles, rib_width=6.0)
+    r_out = (cage_id / 2.0) + p.CAGE_WALL
+    r_gusset_in = max(r_out - 1.5, p.CAGE_ADDON_BASE_ID / 2.0)  # Joins strut wall without grazing inner bore
     r_base_out = p.CAGE_ADDON_BASE_OD / 2.0
     arm_len = (p.LID_OD / 2.0) - (r_base_out - 2.0)
     r_arm_mid = (p.LID_OD / 2.0 + (r_base_out - 2.0)) / 2.0
     z0 = p.Z_LID_TOP
     z_pin_bot = z0 - 4.2
+    gusset_h = (p.LID_OD / 2.0) - r_gusset_in
 
-    for deg in (60.0, 180.0, 300.0):
+    for deg in wing_angles:
         arm = Rot(0, 0, deg) * Pos(r_arm_mid, 0, z0) * Box(
             arm_len, 16.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
@@ -590,8 +594,8 @@ def _syringe_cage_snap(cage_id: float):
             8.2,
             align=(Align.CENTER, Align.CENTER, Align.MIN),
         )
-        # 45-deg support-free gusset rib from (R=26, Z=+26) down to (R=49, Z=+3)
-        gusset_prof = Polygon((26.0, 0.0), (49.0, 0.0), (26.0, 23.0), align=None)
+        # 45-deg triangular gusset joining directly into the vertical cage strut & wing
+        gusset_prof = Polygon((r_gusset_in, 0.0), (49.0, 0.0), (r_gusset_in, gusset_h), align=None)
         gusset_3d = Pos(0, 0, z0 + 3.0) * Rot(90, 0, 0) * extrude(gusset_prof, amount=3.0, both=True)
         gusset = Rot(0, 0, deg) * gusset_3d
         cage = cage + arm + pin + gusset
