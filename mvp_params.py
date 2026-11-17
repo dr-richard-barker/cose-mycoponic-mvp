@@ -113,8 +113,10 @@ FALCON_LOOP_R = 68.0               # Radial center (outside 49 mm lid & 57 mm ba
 FALCON_LOOP_ID = 30.8              # Slides over ~29.6-30.0 mm Falcon tube body
 FALCON_LOOP_WALL = 3.5             # 37.8 mm OD loop
 FALCON_LOOP_HEIGHT = 12.0          # Flush with Z_LID_TOP for support-free print
-FALCON_CAP_SKIRT_ID = 31.4         # Press-fit over ~30.5-31.0 mm Falcon neck threads
-FALCON_CAP_OD = 36.4               # Wide enough to rest atop the 30.8 mm loop
+FALCON_CAP_SKIRT_ID = 31.6         # Root ID for internal Falcon screw threads
+FALCON_CAP_OD = 38.0               # Outer diameter of threaded Falcon cap
+FALCON_THREAD_PITCH = 3.2          # Standard 50 mL Falcon neck thread pitch (mm)
+FALCON_THREAD_DEPTH = 0.95         # 45-deg support-free internal ridge depth (crest Ø29.7 mm)
 FALCON_CAP_PLUG_OD = 26.0          # Inner sealing plug for ~26.8 mm tube mouth ID
 FALCON_CAP_PORT_SPACING = 13.0     # Center-to-center spacing of 2x Ø6.0 mm bores
 

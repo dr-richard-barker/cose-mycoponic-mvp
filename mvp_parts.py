@@ -18,6 +18,7 @@ from build123d import (
     Circle,
     Cone,
     Cylinder,
+    Helix,
     Locations,
     Plane,
     Polygon,
@@ -680,9 +681,7 @@ def mvp_syringe_cage_snap_falcon():
     cap_roof = Pos(fx, fy, z0) * Cylinder(
         p.FALCON_CAP_OD / 2.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    cap_skirt = Pos(fx, fy, 0.0) * _tube(
-        p.FALCON_CAP_SKIRT_ID / 2.0, p.FALCON_CAP_OD / 2.0, 10.0, z0 - 10.0
-    )
+    cap_skirt = Pos(fx, fy, 0.0) * _falcon_threaded_skirt(z0 - 10.0, 10.0)
     cap_plug = Pos(fx, fy, 0.0) * _tube(
         11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 - 7.0
     )
@@ -780,11 +779,31 @@ def mvp_top_lid_falcon():
     return (lid + neck + loop_outer) - loop_bore
 
 
-def mvp_falcon_cap_2port():
-    """2-port press-fit cap for a 50 mL Falcon tube humidifier.
+def _falcon_threaded_skirt(z_bot: float, height: float = 10.0):
+    """Build a Ø38 mm Falcon cap skirt with internal 45-deg helical thread ridges."""
+    r_root = p.FALCON_CAP_SKIRT_ID / 2.0
+    r_out = p.FALCON_CAP_OD / 2.0
+    skirt = _tube(r_root, r_out, height, z_bot)
 
-    Features an outer Ø31.4 mm skirt + Ø26.0 mm inner sealing plug and two
-    Ø6.0 mm bores (13 mm apart) for air-pump inlet & humidified air outlet.
+    thread_h = height - 2.6
+    helix = Pos(0, 0, z_bot + 1.3) * Helix(
+        pitch=p.FALCON_THREAD_PITCH, height=thread_h, radius=r_root
+    )
+    tooth = Plane.XZ * Pos(0, z_bot + 1.3) * Polygon(
+        (r_root + 0.3, -1.1),
+        (r_root - p.FALCON_THREAD_DEPTH, 0.0),
+        (r_root + 0.3, 1.1),
+        align=None,
+    )
+    ridge = sweep(tooth, path=helix, is_frenet=True)
+    return skirt + ridge
+
+
+def mvp_falcon_cap_2port():
+    """2-port screw-on cap for a 50 mL Falcon tube humidifier.
+
+    Features an outer Ø31.6 mm skirt with internal 3.2 mm-pitch thread ridges,
+    a Ø26.0 mm inner sealing plug, and two Ø6.0 mm bores (13 mm apart).
     Print upside-down with zero supports.
     """
     fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
@@ -794,7 +813,7 @@ def mvp_falcon_cap_2port():
     roof_h = 4.5
     z_roof_bot = z_skirt_bot + skirt_h
 
-    skirt = _tube(p.FALCON_CAP_SKIRT_ID / 2.0, p.FALCON_CAP_OD / 2.0, skirt_h, z_skirt_bot)
+    skirt = _falcon_threaded_skirt(z_skirt_bot, skirt_h)
     roof = Pos(0, 0, z_roof_bot) * Cylinder(
         p.FALCON_CAP_OD / 2.0, roof_h, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
