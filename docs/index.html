@@ -238,6 +238,49 @@
         </table>
       </div>
     </section>
+
+    <section id="electronics-bom">
+      <h2>Electronics, Sensor &amp; Pump BOM (~$30.50) &amp; ESP32 Pinout</h2>
+      <div class="grid">
+        <div class="card" style="overflow-x:auto;">
+          <h3>Components</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem;text-align:left;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);color:#f8fafc;">
+                <th style="padding:6px;">Part</th>
+                <th style="padding:6px;">Spec &amp; CAD Fit</th>
+                <th style="padding:6px;">Cost</th>
+              </tr>
+            </thead>
+            <tbody style="color:var(--muted);">
+              <tr style="border-bottom:1px solid #1e293b;"><td style="padding:6px;">ESP32 DevKit</td><td style="padding:6px;">~28&times;52 mm &rarr; 180&deg; bay (M3)</td><td style="padding:6px;">~$6.00</td></tr>
+              <tr style="border-bottom:1px solid #1e293b;"><td style="padding:6px;">SHT30/31 Probe</td><td style="padding:6px;">Ø6 mm IP67 I2C (0x44) &rarr; 120&deg; Ø10 mm port</td><td style="padding:6px;">~$7.00</td></tr>
+              <tr style="border-bottom:1px solid #1e293b;"><td style="padding:6px;">5V Mini Air Pump</td><td style="padding:6px;">Ø27&times;55 mm &rarr; 285&deg; Ø27.4 mm front clips</td><td style="padding:6px;">~$6.00</td></tr>
+              <tr style="border-bottom:1px solid #1e293b;"><td style="padding:6px;">Relay or MOSFET</td><td style="padding:6px;">5V Relay or IRLZ44N + 1N4007 &rarr; 285&deg; bay</td><td style="padding:6px;">~$2.25</td></tr>
+              <tr style="border-bottom:1px solid #1e293b;"><td style="padding:6px;">5V 2A Power Supply</td><td style="padding:6px;">Regulated 5V DC + barrel/USB-C pigtail</td><td style="padding:6px;">~$6.00</td></tr>
+              <tr><td style="padding:6px;">Wiring &amp; Hardware</td><td style="padding:6px;">Dupont jumpers, 4.7 k&Omega; pull-ups, M3&times;8 mm, grommet</td><td style="padding:6px;">~$3.25</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card" style="overflow-x:auto;">
+          <h3>ESP32 Wiring (<code>esp32_humid_controller.ino</code>)</h3>
+          <table style="width:100%;border-collapse:collapse;font-size:0.85rem;text-align:left;">
+            <thead>
+              <tr style="border-bottom:1px solid var(--border);color:#f8fafc;">
+                <th style="padding:6px;">ESP32 Pin</th>
+                <th style="padding:6px;">Connection</th>
+              </tr>
+            </thead>
+            <tbody style="color:var(--muted);">
+              <tr style="border-bottom:1px solid #1e293b;"><td style="padding:6px;"><code>3.3V / GND</code></td><td style="padding:6px;">SHT30/31 VCC &amp; Common GND</td></tr>
+              <tr style="border-bottom:1px solid #1e293b;"><td style="padding:6px;"><code>GPIO 21 / 22</code></td><td style="padding:6px;">SHT30/31 SDA / SCL (I2C 0x44)</td></tr>
+              <tr style="border-bottom:1px solid #1e293b;"><td style="padding:6px;"><code>GPIO 25</code></td><td style="padding:6px;">Relay IN / MOSFET Gate (ON &lt;85% RH, OFF &ge;90%)</td></tr>
+              <tr><td style="padding:6px;"><code>VIN (5V)</code></td><td style="padding:6px;">5V 2A PSU (+) &amp; Pump (+) via Relay/MOSFET + 1N4007</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer>
