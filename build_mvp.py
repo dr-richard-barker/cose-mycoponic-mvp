@@ -24,6 +24,7 @@ OUT_STEP_DIR = os.path.join(CURRENT_DIR, "out", "step")
 
 PRINT_PARTS = [
     ("mvp_top_lid", parts.mvp_top_lid),
+    ("mvp_top_lid_pegs", parts.mvp_top_lid_pegs),
     ("mvp_top_lid_falcon", parts.mvp_top_lid_falcon),
     ("mvp_falcon_cap_2port", parts.mvp_falcon_cap_2port),
     ("mvp_top_lid_syringe_tower", parts.mvp_top_lid_syringe_tower),
@@ -113,6 +114,10 @@ def main():
         ("mvp_top_lid", "mvp_syringe_cage_snap_falcon"),
         ("mvp_candle_collar", "mvp_syringe_cage_snap_falcon"),
         ("mvp_top_lid", "mvp_syringe_cage_snap_falcon_funnel"),
+        ("mvp_top_lid_pegs", "mvp_tube_ref"),
+        ("mvp_top_lid_pegs", "mvp_candle_ref"),
+        ("mvp_top_lid_pegs", "mvp_candle_collar"),
+        ("mvp_top_lid_pegs", "mvp_syringe_cage_snap_falcon_funnel"),
         ("mvp_candle_collar", "mvp_syringe_cage_snap_falcon_funnel"),
         ("mvp_top_lid_syringe_tower", "mvp_tube_ref"),
         ("mvp_top_lid_syringe_tower", "mvp_candle_ref"),

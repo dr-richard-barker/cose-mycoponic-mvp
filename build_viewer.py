@@ -17,6 +17,7 @@ PARTS_META = [
     ("mvp_bottom_base_collection", "Bottom Base (10 mL Syringe Holder)", "#60a5fa", 1.0, 0.0),
     ("mvp_tube_ref", "Clear Acrylic Tube (85x90x100 mm)", "#67e8f9", 0.28, 1.0),
     ("mvp_top_lid", "Top Lid (Standard Slide-On)", "#10b981", 1.0, 2.0),
+    ("mvp_top_lid_pegs", "Top Lid (Upward Alignment Pegs)", "#34d399", 1.0, 2.0),
     ("mvp_top_lid_falcon", "Top Lid (50 mL Falcon Loop)", "#14b8a6", 1.0, 2.0),
     ("mvp_falcon_cap_2port", "Falcon 2-Port Humidifier Cap", "#f59e0b", 1.0, 2.8),
     ("mvp_top_lid_syringe_tower", "Top Lid (50 mL Syringe Tower)", "#10b981", 1.0, 2.0),
@@ -299,6 +300,7 @@ def main():
       meshes[name] = mesh;
 
       const hiddenByDefault = [
+        "mvp_top_lid_pegs",
         "mvp_top_lid_falcon",
         "mvp_falcon_cap_2port",
         "mvp_top_lid_syringe_tower",
@@ -375,7 +377,7 @@ def main():
     const common = ["mvp_bottom_base_collection", "mvp_tube_ref", "mvp_candle_ref", "mvp_candle_collar", "mvp_syringe_50ml_ref", "mvp_syringe_10ml_ref"];
     const sysParts = ["mvp_top_lid", "mvp_syringe_cage_snap_falcon", "mvp_falcon_50ml_ref", ...sysLayerNames];
     document.getElementById("preset-fullsys").onclick = () => {{ sysVisible = true; syncSysBtn(); applyPreset("preset-fullsys", [...common, ...sysParts]); }};
-    document.getElementById("preset-funnel").onclick = () => {{ sysVisible = true; syncSysBtn(); applyPreset("preset-funnel", [...common, "mvp_top_lid", "mvp_syringe_cage_snap_falcon_funnel", "mvp_falcon_50ml_ref", ...sysLayerNames]); }};
+    document.getElementById("preset-funnel").onclick = () => {{ sysVisible = true; syncSysBtn(); applyPreset("preset-funnel", [...common, "mvp_top_lid_pegs", "mvp_syringe_cage_snap_falcon_funnel", "mvp_falcon_50ml_ref", ...sysLayerNames]); }};
     document.getElementById("preset-snap50").onclick = () => {{ sysVisible = false; syncSysBtn(); applyPreset("preset-snap50", [...common, "mvp_top_lid", "mvp_syringe_cage_snap"]); }};
     document.getElementById("preset-tower").onclick = () => {{ sysVisible = false; syncSysBtn(); applyPreset("preset-tower", [...common, "mvp_top_lid_syringe_tower"]); }};
 

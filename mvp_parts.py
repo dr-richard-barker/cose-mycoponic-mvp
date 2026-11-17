@@ -136,6 +136,27 @@ def mvp_top_lid():
     return lid
 
 
+def mvp_top_lid_pegs():
+    """Standard slide-on top lid with 3x upward alignment pegs (Ø13.8 mm x 3.8 mm
+    above Z_LID_TOP) at 60/180/300 deg that mate into the Ø14.2 mm wing holes of
+    mvp_syringe_cage_snap_falcon_funnel.
+    """
+    lid = mvp_top_lid()
+    peg_r = (p.SYRINGE_PILLAR_DIA - 0.2) / 2.0  # 6.9 mm (Ø13.8 mm)
+    peg_z0 = p.Z_LID_TOP - 5.0  # anchor 0.5 mm into the 4.5 mm socket floor
+    peg_h = 5.0 + 3.8  # protrudes 3.8 mm above Z_LID_TOP into 4.0 mm wing
+    for deg in (60.0, 180.0, 300.0):
+        sx = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
+        sy = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
+        peg = Pos(sx, sy, peg_z0) * Cylinder(
+            peg_r,
+            peg_h,
+            align=(Align.CENTER, Align.CENTER, Align.MIN),
+        )
+        lid = lid + peg
+    return lid
+
+
 def mvp_top_lid_syringe_tower():
     """Extended lid variant with a 165 mm (6.5 in) 3-pillar frame on top.
 
@@ -720,14 +741,9 @@ def mvp_syringe_cage_snap_falcon_funnel():
         arm = Rot(0, 0, deg) * Pos(r_arm_mid, 0, z0) * Box(
             arm_len, 16.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
-        px = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
-        py = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
-        pin_hole = Pos(px, py, z0 - 0.5) * Cylinder(
-            (p.SYRINGE_PILLAR_DIA + 0.2) / 2.0, 5.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
-        )
         gusset_prof = Polygon((17.5, 0.0), (49.0, 0.0), (17.5, 31.5), align=None)
         gusset_3d = Pos(0, 0, z0 + 3.0) * Rot(90, 0, 0) * extrude(gusset_prof, amount=3.0, both=True)
-        base = (base + arm + (Rot(0, 0, deg) * gusset_3d)) - pin_hole
+        base = base + arm + (Rot(0, 0, deg) * gusset_3d)
 
     # 2. Integrated 300 deg threaded 50 mL Falcon cap (roof at z0..+4, skirt facing DOWN)
     fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
@@ -743,6 +759,13 @@ def mvp_syringe_cage_snap_falcon_funnel():
     cap_skirt = Pos(fx, fy, 0.0) * _falcon_threaded_skirt(z0 - 10.0, 10.0)
     cap_plug = Pos(fx, fy, 0.0) * _tube(11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 - 7.0)
     base = base + bridge + cap_roof + cap_skirt + cap_plug
+    for deg in wing_angles:
+        px = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
+        py = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
+        pin_hole = Pos(px, py, z0) * Cylinder(
+            (p.SYRINGE_PILLAR_DIA + 0.2) / 2.0, 4.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        base = base - pin_hole
     for dx in (-p.FALCON_CAP_PORT_SPACING / 2.0, p.FALCON_CAP_PORT_SPACING / 2.0):
         hole = Pos(fx + dx, fy, z0 - 1.0) * Cylinder(
             p.AIR_PORT_BORE_DIA / 2.0, 6.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
