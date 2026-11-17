@@ -698,6 +698,58 @@ def mvp_syringe_cage_snap_falcon():
     return merged
 
 
+def mvp_syringe_cage_snap_falcon_funnel():
+    """New Snap-On 50 mL Net variant with an integrated hollow 2-funnel
+    (biconical) chamber + 300 deg Falcon cap:
+      - Bottom funnel screws onto the 4-in ceramic candle stem (1/4" BSP)
+      - Wide middle belly (Ø28 mm OD / Ø23 mm ID) braced to the 3 net struts
+      - Top funnel ends in a Female Luer Lock port for screwing in a 50 mL syringe
+    """
+    net = mvp_syringe_cage_snap_falcon()
+    z0 = p.Z_LID_TOP
+
+    # Bottom 1/4" BSP female socket boss (Ø18 mm OD, Ø12.2 mm bore)
+    bot_boss = _tube(6.1, 9.0, 8.0, z0 + 2.0)
+    # Bottom 45-deg funnel (Ø18 -> Ø28 mm OD, Ø12.2 -> Ø23 mm ID)
+    bot_cone_out = _frustum(9.0, 14.0, 5.0, z0 + 10.0)
+    bot_cone_in = _frustum(6.1, 11.5, 5.2, z0 + 9.9)
+    # Middle belly band (Ø28 mm OD / Ø23 mm ID)
+    belly = _tube(11.5, 14.0, 2.0, z0 + 15.0)
+    # Top 45-deg funnel (Ø28 -> Ø9.0 mm OD, Ø23 -> Ø3.0 mm ID)
+    top_cone_out = _frustum(14.0, 4.5, 9.5, z0 + 17.0)
+    top_cone_in = _frustum(11.5, 1.5, 9.7, z0 + 16.9)
+    # Top Female Luer Lock boss + twin lock ears (Z = z0+20.5..z0+28.0)
+    luer_boss = Pos(0, 0, z0 + 20.5) * Cylinder(
+        4.5, 7.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    luer_ears = Pos(0, 0, z0 + 26.5) * Box(
+        10.4, 3.6, 1.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    luer_taper = Pos(0, 0, z0 + 20.5) * Cone(
+        p.LUER_BOT_DIA / 2.0, p.LUER_TOP_DIA / 2.0, 7.8,
+        align=(Align.CENTER, Align.CENTER, Align.MIN),
+    )
+
+    chamber = (
+        bot_boss
+        + (bot_cone_out - bot_cone_in)
+        + belly
+        + (top_cone_out - top_cone_in)
+        + luer_boss
+        + luer_ears
+    ) - luer_taper
+
+    # 3 radial webs (60/180/300 deg) bracing the Ø28 mm belly into the 3 net struts
+    webs = None
+    for deg in (60.0, 180.0, 300.0):
+        web = Rot(0, 0, deg) * Pos(15.2, 0, z0 + 13.5) * Box(
+            4.0, 4.5, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        webs = web if webs is None else (webs + web)
+
+    return net + chamber + webs
+
+
 def mvp_top_lid_falcon():
     """Lid variant with a side-mounted Ø30.8 mm loop at 120 deg (next to the
     humid air inlet port) so a 50 mL Falcon tube humidifier slides in from above.
