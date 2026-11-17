@@ -698,46 +698,69 @@ def mvp_syringe_cage_snap_falcon():
 
 
 def mvp_syringe_cage_snap_falcon_funnel():
-    """New Snap-On 50 mL Net variant (Ø33.5 mm ID x 55 mm tall) with an
-    integrated hollow 2-funnel (biconical) chamber + 300 deg Falcon cap:
-      - Bottom funnel: 1/4" BSP (19 TPI, 1.337 mm pitch) internal screw socket
-        that screws directly onto the 4-in ceramic candle stem
-      - Wide middle belly (Ø28 mm OD / Ø23 mm ID) braced to the 3 net struts
-      - Top funnel: ISO 80369-7 Female Luer-Lock (Ø6.7 mm hub, Ø7.8 mm ears)
-        for screwing in a 50 mL Luer-Lock syringe
-    """
-    net = mvp_syringe_cage_snap_falcon()
-    z0 = p.Z_LID_TOP
+    """Simplified, larger-volume (~11.5 mL) Double-Funnel Net + 300 deg
+    threaded Falcon cap.
 
-    # Bottom 1/4" BSP (19 TPI) internal-threaded socket boss (Ø20 mm OD, z0+1..+10)
+    The double-funnel belly (Ø39.5 mm OD / Ø33.5 mm ID) serves directly as the
+    base of the 3-strut syringe cage—eliminating radial webs and the separate
+    collar flare while nearly tripling internal buffer volume.
+    """
+    z0 = p.Z_LID_TOP
+    r_in = p.CAGE_ID / 2.0            # 16.75 mm (Ø33.5 mm)
+    r_out = r_in + p.CAGE_WALL        # 19.75 mm (Ø39.5 mm)
+    r_mid = (r_in + r_out) / 2.0
+    r_base_out = p.CAGE_ADDON_BASE_OD / 2.0
+    wing_angles = (60.0, 180.0, 300.0)
+
+    # 1. Snap-in base ring (Ø20 mm ID to Ø58 mm OD, z0..z0+3) + 3 wings & pins
+    base = _tube(10.0, r_base_out, 3.0, z0)
+    arm_len = (p.LID_OD / 2.0) - (r_base_out - 2.0)
+    r_arm_mid = (p.LID_OD / 2.0 + (r_base_out - 2.0)) / 2.0
+    for deg in wing_angles:
+        arm = Rot(0, 0, deg) * Pos(r_arm_mid, 0, z0) * Box(
+            arm_len, 16.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        px = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
+        py = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
+        pin = Pos(px, py, z0 - 4.2) * Cylinder(
+            p.SYRINGE_PILLAR_DIA / 2.0, 8.2, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        gusset_prof = Polygon((26.0, 0.0), (49.0, 0.0), (26.0, 23.0), align=None)
+        gusset_3d = Pos(0, 0, z0 + 3.0) * Rot(90, 0, 0) * extrude(gusset_prof, amount=3.0, both=True)
+        base = base + arm + pin + (Rot(0, 0, deg) * gusset_3d)
+
+    # 2. Integrated 300 deg threaded 50 mL Falcon cap
+    fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    bridge_len = p.FALCON_LOOP_R - 46.0
+    bridge_mid = (p.FALCON_LOOP_R + 46.0) / 2.0
+    bridge = Rot(0, 0, p.FALCON_LOOP_ANGLE_DEG) * Pos(bridge_mid, 0, z0) * Box(
+        bridge_len, 20.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    cap_roof = Pos(fx, fy, z0) * Cylinder(
+        p.FALCON_CAP_OD / 2.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    cap_skirt = Pos(fx, fy, 0.0) * _falcon_threaded_skirt(z0 - 10.0, 10.0)
+    cap_plug = Pos(fx, fy, 0.0) * _tube(11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 - 7.0)
+    base = base + bridge + cap_roof + cap_skirt + cap_plug
+    for dx in (-p.FALCON_CAP_PORT_SPACING / 2.0, p.FALCON_CAP_PORT_SPACING / 2.0):
+        hole = Pos(fx + dx, fy, z0 - 1.0) * Cylinder(
+            p.AIR_PORT_BORE_DIA / 2.0, 6.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        base = base - hole
+
+    # 3. Unified Double-Funnel Chamber (1/4" BSP -> Ø39.5/33.5 mm belly -> Luer-Lock)
     bot_boss = _internal_thread(
-        p.BSP14_ROOT_ID / 2.0,
-        10.0,
-        z0 + 1.0,
-        9.0,
-        p.BSP14_PITCH,
-        p.BSP14_DEPTH,
-        tooth_half_base=0.55,
+        p.BSP14_ROOT_ID / 2.0, 10.0, z0, 9.0, p.BSP14_PITCH, p.BSP14_DEPTH, tooth_half_base=0.55
     )
-    # Bottom 45-deg funnel (Ø20 -> Ø28 mm OD, Ø13.4 -> Ø23 mm ID)
-    bot_cone_out = _frustum(10.0, 14.0, 4.0, z0 + 10.0)
-    bot_cone_in = _frustum(p.BSP14_ROOT_ID / 2.0, 11.5, 4.2, z0 + 9.9)
-    # Middle belly band (Ø28 mm OD / Ø23 mm ID)
-    belly = _tube(11.5, 14.0, 2.5, z0 + 14.0)
-    # Top 45-deg funnel (Ø28 -> Ø6.7 mm hub OD, Ø23 -> Ø3.0 mm ID)
-    top_cone_out = _frustum(14.0, 3.35, 10.5, z0 + 16.5)
-    top_cone_in = _frustum(11.5, 1.5, 10.7, z0 + 16.4)
-    # Top ISO 80369-7 Female Luer-Lock hub (Ø6.7 mm OD, Ø7.8 mm x 1.2 mm ears)
-    luer_boss = Pos(0, 0, z0 + 21.0) * Cylinder(
-        3.35, 7.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-    luer_ears = Pos(0, 0, z0 + 27.3) * Box(
-        7.8, 2.6, 1.2, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-    luer_taper = Pos(0, 0, z0 + 21.0) * Cone(
-        3.90 / 2.0, 4.30 / 2.0, 7.7,
-        align=(Align.CENTER, Align.CENTER, Align.MIN),
-    )
+    bot_cone_out = _frustum(10.0, r_out, 9.75, z0 + 8.5)
+    bot_cone_in = _frustum(p.BSP14_ROOT_ID / 2.0, r_in, 9.95, z0 + 8.4)
+    belly = _tube(r_in, r_out, 6.0, z0 + 18.25)
+    top_cone_out = _frustum(r_out, 3.35, 16.4, z0 + 24.25)
+    top_cone_in = _frustum(r_in, 1.5, 16.6, z0 + 24.15)
+    luer_boss = Pos(0, 0, z0 + 34.5) * Cylinder(3.35, 7.5, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    luer_ears = Pos(0, 0, z0 + 40.8) * Box(7.8, 2.6, 1.2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    luer_taper = Pos(0, 0, z0 + 34.5) * Cone(3.90 / 2.0, 4.30 / 2.0, 7.7, align=(Align.CENTER, Align.CENTER, Align.MIN))
 
     chamber = (
         bot_boss
@@ -748,15 +771,19 @@ def mvp_syringe_cage_snap_falcon_funnel():
         + luer_ears
     ) - luer_taper
 
-    # 3 radial webs (60/180/300 deg) bracing the Ø28 mm belly into Ø33.5 mm net struts
-    webs = None
-    for deg in (60.0, 180.0, 300.0):
-        web = Rot(0, 0, deg) * Pos(16.0, 0, z0 + 13.0) * Box(
-            5.0, 4.5, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    # 4. 3-strut syringe cage rising directly off the Ø39.5 mm funnel belly
+    z_cage_start = z0 + 24.25
+    z_top_ring = z_cage_start + p.CAGE_HEIGHT - p.CAGE_RING_HEIGHT
+    top_ring = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_top_ring)
+    rib_h = (z_top_ring - z_cage_start) + 2.5
+    cage = top_ring
+    for ang in wing_angles:
+        rib = Rot(0, 0, ang) * Pos(r_mid, 0, z_cage_start - 1.2) * Box(
+            p.CAGE_WALL, 6.0, rib_h, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
-        webs = web if webs is None else (webs + web)
+        cage = cage + rib
 
-    return net + chamber + webs
+    return base + chamber + cage
 
 
 def mvp_top_lid_falcon():
