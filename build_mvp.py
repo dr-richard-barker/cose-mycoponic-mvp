@@ -37,6 +37,7 @@ PRINT_PARTS = [
     ("mvp_syringe_cage_snap_25ml", parts.mvp_syringe_cage_snap_25ml),
     ("mvp_syringe_cage_snap_falcon", parts.mvp_syringe_cage_snap_falcon),
     ("mvp_syringe_cage_snap_falcon_funnel", parts.mvp_syringe_cage_snap_falcon_funnel),
+    ("mvp_snap_pin", parts.mvp_snap_pin),
     ("mvp_candle_collar", parts.mvp_candle_collar),
     ("mvp_bottom_base", parts.mvp_bottom_base),
     ("mvp_bottom_base_collection", parts.mvp_bottom_base_collection),

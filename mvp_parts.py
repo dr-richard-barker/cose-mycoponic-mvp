@@ -712,7 +712,7 @@ def mvp_syringe_cage_snap_falcon_funnel():
     r_base_out = p.CAGE_ADDON_BASE_OD / 2.0
     wing_angles = (60.0, 180.0, 300.0)
 
-    # 1. Snap-in base ring (Ø20 mm ID to Ø58 mm OD, z0..z0+3) + 3 wings & pins
+    # 1. Snap-in base ring (Ø20 mm ID to Ø58 mm OD, z0..z0+3) + 3 wings with Ø14.2 mm pin holes
     base = _tube(10.0, r_base_out, 3.0, z0)
     arm_len = (p.LID_OD / 2.0) - (r_base_out - 2.0)
     r_arm_mid = (p.LID_OD / 2.0 + (r_base_out - 2.0)) / 2.0
@@ -722,14 +722,14 @@ def mvp_syringe_cage_snap_falcon_funnel():
         )
         px = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
         py = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
-        pin = Pos(px, py, z0 - 4.2) * Cylinder(
-            p.SYRINGE_PILLAR_DIA / 2.0, 8.2, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        pin_hole = Pos(px, py, z0 - 0.5) * Cylinder(
+            (p.SYRINGE_PILLAR_DIA + 0.2) / 2.0, 5.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
         gusset_prof = Polygon((17.5, 0.0), (49.0, 0.0), (17.5, 31.5), align=None)
         gusset_3d = Pos(0, 0, z0 + 3.0) * Rot(90, 0, 0) * extrude(gusset_prof, amount=3.0, both=True)
-        base = base + arm + pin + (Rot(0, 0, deg) * gusset_3d)
+        base = (base + arm + (Rot(0, 0, deg) * gusset_3d)) - pin_hole
 
-    # 2. Integrated 300 deg threaded 50 mL Falcon cap
+    # 2. Integrated 300 deg threaded 50 mL Falcon cap (flat roof at z0..+4, skirt pointing UP)
     fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
     fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
     bridge_len = p.FALCON_LOOP_R - 46.0
@@ -740,8 +740,8 @@ def mvp_syringe_cage_snap_falcon_funnel():
     cap_roof = Pos(fx, fy, z0) * Cylinder(
         p.FALCON_CAP_OD / 2.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    cap_skirt = Pos(fx, fy, 0.0) * _falcon_threaded_skirt(z0 - 10.0, 10.0)
-    cap_plug = Pos(fx, fy, 0.0) * _tube(11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 - 7.0)
+    cap_skirt = Pos(fx, fy, 0.0) * _falcon_threaded_skirt(z0 + 4.0, 10.0)
+    cap_plug = Pos(fx, fy, 0.0) * _tube(11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 + 4.0)
     base = base + bridge + cap_roof + cap_skirt + cap_plug
     for dx in (-p.FALCON_CAP_PORT_SPACING / 2.0, p.FALCON_CAP_PORT_SPACING / 2.0):
         hole = Pos(fx + dx, fy, z0 - 1.0) * Cylinder(
@@ -784,6 +784,16 @@ def mvp_syringe_cage_snap_falcon_funnel():
         cage = cage + rib
 
     return base + chamber + cage
+
+
+def mvp_snap_pin():
+    """Printable Ø14.0 x 8.2 mm dowel pin (print 3x flat) that drops through
+    the Ø14.2 mm wing holes of mvp_syringe_cage_snap_falcon_funnel into the
+    three Ø14.5 mm circular indents on mvp_top_lid.
+    """
+    return Cylinder(
+        p.SYRINGE_PILLAR_DIA / 2.0, 8.2, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
 
 
 def mvp_top_lid_falcon():
