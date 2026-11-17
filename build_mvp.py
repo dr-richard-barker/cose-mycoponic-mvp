@@ -49,6 +49,10 @@ REF_PARTS = [
     ("mvp_syringe_50ml_ref", parts.mvp_syringe_50ml_ref),
     ("mvp_syringe_10ml_ref", parts.mvp_syringe_10ml_ref),
     ("mvp_falcon_50ml_ref", parts.mvp_falcon_50ml_ref),
+    ("mvp_electronics_ref", parts.mvp_electronics_ref),
+    ("mvp_sensor_probe_ref", parts.mvp_sensor_probe_ref),
+    ("mvp_cables_ref", parts.mvp_cables_ref),
+    ("mvp_plumbing_ref", parts.mvp_plumbing_ref),
 ]
 
 
@@ -60,6 +64,7 @@ def main():
     all_ok = True
 
     print("=== Building MVP Parts & Exporting STL / STEP ===")
+    print_names = {n for n, _ in PRINT_PARTS}
     for name, builder in PRINT_PARTS + REF_PARTS:
         shape = builder()
         solids[name] = shape
@@ -75,7 +80,7 @@ def main():
         watertight = mesh.is_watertight
         bodies = len(shape.solids())
         vol_cm3 = mesh.volume / 1000.0
-        ok_mesh = watertight and (bodies == 1)
+        ok_mesh = watertight and (bodies == 1 if name in print_names else bodies >= 1)
         status = "OK (watertight)" if ok_mesh else f"FAIL (wt={watertight}, bodies={bodies})"
         if not ok_mesh:
             all_ok = False

@@ -33,6 +33,10 @@ PARTS_META = [
     ("mvp_syringe_50ml_ref", "50 mL Nutrient Feed Syringe", "#bae6fd", 0.42, 4.0),
     ("mvp_syringe_10ml_ref", "10 mL Collection Syringe", "#bae6fd", 0.42, 0.0),
     ("mvp_falcon_50ml_ref", "50 mL Falcon Humidifier Tube", "#7dd3fc", 0.40, 2.2),
+    ("mvp_electronics_ref", "ESP32, Relay, Air Pump & 5V PSU", "#a855f7", 1.0, 0.0),
+    ("mvp_sensor_probe_ref", "SHT30 Temp/RH Probe & Cable", "#eab308", 1.0, 1.5),
+    ("mvp_cables_ref", "Power & Pump Control Cables", "#ef4444", 1.0, 0.0),
+    ("mvp_plumbing_ref", "Air Tubes, Drain Tube & Valve", "#06b6d4", 0.78, 0.0),
 ]
 
 
@@ -175,9 +179,9 @@ def main():
     <div class="group">
       <div class="group-title">Configuration Presets</div>
       <div class="btn-grid">
-        <button id="preset-snap50" class="active">Snap-On 50 mL Net</button>
+        <button id="preset-fullsys" class="active">Full System (+ Electronics)</button>
+        <button id="preset-snap50">Snap-On 50 mL Net</button>
         <button id="preset-falcon">Falcon Humidifier</button>
-        <button id="preset-cage50">50 mL + Retainer</button>
         <button id="preset-tower">Full Tower</button>
       </div>
     </div>
@@ -294,8 +298,6 @@ def main():
 
       const hiddenByDefault = [
         "mvp_top_lid_falcon",
-        "mvp_falcon_cap_2port",
-        "mvp_falcon_50ml_ref",
         "mvp_top_lid_syringe_tower",
         "mvp_syringe_tower_addon_half",
         "mvp_bottom_base",
@@ -303,8 +305,8 @@ def main():
         "mvp_syringe_cage_addon",
         "mvp_syringe_cage_addon_25ml",
         "mvp_cage_retainer_ring",
+        "mvp_syringe_cage_snap",
         "mvp_syringe_cage_snap_25ml",
-        "mvp_syringe_cage_snap_falcon",
       ];
       if (hiddenByDefault.includes(name)) mesh.visible = false;
 
@@ -351,9 +353,10 @@ def main():
       }}
     }}
     const common = ["mvp_bottom_base_collection", "mvp_tube_ref", "mvp_candle_ref", "mvp_candle_collar", "mvp_syringe_50ml_ref", "mvp_syringe_10ml_ref"];
+    const sysParts = ["mvp_top_lid", "mvp_syringe_cage_snap_falcon", "mvp_falcon_cap_2port", "mvp_falcon_50ml_ref", "mvp_electronics_ref", "mvp_sensor_probe_ref", "mvp_cables_ref", "mvp_plumbing_ref"];
+    document.getElementById("preset-fullsys").onclick = () => applyPreset("preset-fullsys", [...common, ...sysParts]);
     document.getElementById("preset-snap50").onclick = () => applyPreset("preset-snap50", [...common, "mvp_top_lid", "mvp_syringe_cage_snap"]);
     document.getElementById("preset-falcon").onclick = () => applyPreset("preset-falcon", [...common, "mvp_top_lid", "mvp_syringe_cage_snap_falcon", "mvp_falcon_cap_2port", "mvp_falcon_50ml_ref"]);
-    document.getElementById("preset-cage50").onclick = () => applyPreset("preset-cage50", [...common, "mvp_top_lid", "mvp_syringe_cage_addon", "mvp_cage_retainer_ring"]);
     document.getElementById("preset-tower").onclick = () => applyPreset("preset-tower", [...common, "mvp_top_lid_syringe_tower"]);
 
     const explodeSlider = document.getElementById("explode");

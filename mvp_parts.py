@@ -15,6 +15,7 @@ import math
 from build123d import (
     Align,
     Box,
+    Circle,
     Cone,
     Cylinder,
     Locations,
@@ -22,8 +23,10 @@ from build123d import (
     Polygon,
     Pos,
     Rot,
+    Spline,
     chamfer,
     extrude,
+    sweep,
 )
 
 import mvp_params as p
@@ -718,6 +721,124 @@ def mvp_falcon_50ml_ref():
     cone_out = _frustum(3.0, 14.8, 30.0, z_tip)
     cone_in = _frustum(1.6, 13.4, 28.0, z_tip + 2.0)
     return Pos(fx, fy, 0.0) * (cyl + (cone_out - cone_in))
+
+
+def _pipe(pts, radius: float):
+    """Sweep a circular cross-section along a smooth 3D spline."""
+    path = Spline(*pts)
+    section = Plane(origin=pts[0], z_dir=path.tangent_at(0.0)) * Circle(radius)
+    return sweep(section, path)
+
+
+def mvp_electronics_ref():
+    """Reference solids for ESP32 (180 deg bay), Relay/MOSFET (285 deg bay),
+    Mini Air Pump, and 5V Power Supply beside the 300 deg Falcon humidifier.
+    """
+    esp32 = Pos(-39.0, 0.0, 5.0) * Box(24.0, 48.0, 6.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    relay = Rot(0, 0, 285.0) * Pos(39.0, 0.0, 5.0) * Box(
+        20.0, 30.0, 10.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    pump = Pos(95.0, -55.0, 14.0) * Rot(-90, 0, 0) * Cylinder(
+        13.5, 55.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
+    )
+    pump_nozzle = Pos(95.0, -24.0, 14.0) * Rot(-90, 0, 0) * Cylinder(
+        3.5, 10.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
+    )
+    psu = Pos(-95.0, -45.0, 0.0) * Box(38.0, 55.0, 24.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    return esp32 + relay + pump + pump_nozzle + psu
+
+
+def mvp_sensor_probe_ref():
+    """Reference solid for SHT30/31 temp/humidity probe hanging through the
+    120 deg (Ø10 mm) lid port into headspace + cable to the 180 deg ESP32 bay.
+    """
+    px3 = p.PORT_RING_RADIUS * math.cos(math.radians(120.0))
+    py3 = p.PORT_RING_RADIUS * math.sin(math.radians(120.0))
+    probe = Pos(px3, py3, 110.0) * Cylinder(
+        3.0, 22.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    cable = _pipe(
+        [
+            (px3, py3, 131.5),
+            (px3, py3, 166.0),
+            (-56.0, 34.0, 148.0),
+            (-58.0, 14.0, 25.0),
+            (-39.0, 10.0, 11.0),
+        ],
+        1.5,
+    )
+    return probe + cable
+
+
+def mvp_cables_ref():
+    """Reference solids for 5V power and pump-control wiring harnesses."""
+    psu_to_esp = _pipe(
+        [(-76.0, -45.0, 12.0), (-62.0, -25.0, 6.0), (-45.0, -12.0, 8.0)],
+        1.6,
+    )
+    esp_to_relay = _pipe(
+        [(-39.0, -20.0, 8.0), (-20.0, -35.0, 7.0), (8.0, -37.0, 10.0)],
+        1.3,
+    )
+    relay_to_pump = _pipe(
+        [(16.0, -39.0, 10.0), (52.0, -52.0, 8.0), (82.0, -55.0, 14.0)],
+        1.4,
+    )
+    return psu_to_esp + esp_to_relay + relay_to_pump
+
+
+def mvp_plumbing_ref():
+    """Reference solids for bottom drain tube + inline valve (0 deg barb to
+    75 deg 10 mL syringe) and air-pump -> Falcon -> 240 deg lid tubing.
+    """
+    # Bottom drain tube + inline mini ball valve
+    syr_x = p.COLL_CRADLE_R * math.cos(math.radians(p.COLL_CRADLE_ANGLE_DEG)) - (
+        -48.0 * math.sin(math.radians(p.COLL_CRADLE_ANGLE_DEG))
+    )
+    syr_y = p.COLL_CRADLE_R * math.sin(math.radians(p.COLL_CRADLE_ANGLE_DEG)) + (
+        -48.0 * math.cos(math.radians(p.COLL_CRADLE_ANGLE_DEG))
+    )
+    drain_tube = _pipe(
+        [(62.0, 0.0, 20.0), (77.0, 9.0, 19.0), (74.0, 26.0, 16.0), (syr_x, syr_y, p.COLL_CRADLE_Z)],
+        3.2,
+    )
+    valve_body = Pos(75.5, 17.5, 18.0) * Rot(0, 90, 110) * Cylinder(
+        6.0, 20.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
+    )
+    valve_handle = Pos(75.5, 17.5, 25.0) * Rot(0, 0, 20) * Box(
+        18.0, 4.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
+    )
+
+    # Air pump -> Falcon cap Port A + internal dip tube
+    fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    z_cap_top = p.Z_LID_TOP + 14.5
+    p_a_x = fx - (p.FALCON_CAP_PORT_SPACING / 2.0)
+    p_b_x = fx + (p.FALCON_CAP_PORT_SPACING / 2.0)
+
+    pump_to_falcon = _pipe(
+        [
+            (95.0, -20.0, 14.0),
+            (95.0, -35.0, 55.0),
+            (55.0, -68.0, 192.0),
+            (p_a_x, fy, z_cap_top),
+            (p_a_x, fy, 70.0),
+        ],
+        2.8,
+    )
+    # Falcon cap Port B -> main lid 240 deg humid air inlet
+    px2 = p.PORT_RING_RADIUS * math.cos(math.radians(240.0))
+    py2 = p.PORT_RING_RADIUS * math.sin(math.radians(240.0))
+    falcon_to_lid = _pipe(
+        [
+            (p_b_x, fy, z_cap_top - 4.0),
+            (p_b_x, fy, 196.0),
+            (8.0, -52.0, 198.0),
+            (px2, py2, p.Z_LID_TOP - 2.0),
+        ],
+        2.8,
+    )
+    return drain_tube + valve_body + valve_handle + pump_to_falcon + falcon_to_lid
 
 
 def mvp_fit_test_coupon():
