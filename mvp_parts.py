@@ -745,19 +745,21 @@ def mvp_syringe_cage_snap_falcon_funnel():
         gusset_3d = Pos(0, 0, z0 + 3.0) * Rot(90, 0, 0) * extrude(gusset_prof, amount=3.0, both=True)
         base = base + arm + (Rot(0, 0, deg) * gusset_3d)
 
-    # 2. Integrated 300 deg threaded 50 mL Falcon cap (roof at z0..+4, skirt facing DOWN)
+    # 2. Integrated 300 deg threaded 50 mL Falcon cap (skirt bottom flush at z0, roof at z0+10..+14)
     fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
     fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
-    bridge_len = p.FALCON_LOOP_R - 46.0
-    bridge_mid = (p.FALCON_LOOP_R + 46.0) / 2.0
+    r_bridge_in = 46.0
+    r_bridge_out = p.FALCON_LOOP_R - (p.FALCON_CAP_OD / 2.0) + 2.0  # 51.0 mm (embeds 2 mm into skirt wall)
+    bridge_len = r_bridge_out - r_bridge_in
+    bridge_mid = (r_bridge_out + r_bridge_in) / 2.0
     bridge = Rot(0, 0, p.FALCON_LOOP_ANGLE_DEG) * Pos(bridge_mid, 0, z0) * Box(
-        bridge_len, 20.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        bridge_len, 20.0, 14.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    cap_roof = Pos(fx, fy, z0) * Cylinder(
+    cap_roof = Pos(fx, fy, z0 + 10.0) * Cylinder(
         p.FALCON_CAP_OD / 2.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    cap_skirt = Pos(fx, fy, 0.0) * _falcon_threaded_skirt(z0 - 10.0, 10.0)
-    cap_plug = Pos(fx, fy, 0.0) * _tube(11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 - 7.0)
+    cap_skirt = Pos(fx, fy, 0.0) * _falcon_threaded_skirt(z0, 10.0)
+    cap_plug = Pos(fx, fy, 0.0) * _tube(11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 + 3.0)
     base = base + bridge + cap_roof + cap_skirt + cap_plug
     for deg in wing_angles:
         px = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
@@ -767,7 +769,7 @@ def mvp_syringe_cage_snap_falcon_funnel():
         )
         base = base - pin_hole
     for dx in (-p.FALCON_CAP_PORT_SPACING / 2.0, p.FALCON_CAP_PORT_SPACING / 2.0):
-        hole = Pos(fx + dx, fy, z0 - 1.0) * Cylinder(
+        hole = Pos(fx + dx, fy, z0 + 9.0) * Cylinder(
             p.AIR_PORT_BORE_DIA / 2.0, 6.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
         base = base - hole
