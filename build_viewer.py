@@ -180,8 +180,8 @@ def main():
     <div class="group">
       <div class="group-title">Configuration Presets</div>
       <div class="btn-grid">
-        <button id="preset-fullsys" class="active">Full System (+ Electronics)</button>
-        <button id="preset-funnel">Double-Funnel Net</button>
+        <button id="preset-funnel" class="active">Double-Funnel Net</button>
+        <button id="preset-fullsys">Full System (+ Electronics)</button>
         <button id="preset-snap50">Snap-On 50 mL Net</button>
         <button id="preset-tower">Full Tower</button>
       </div>
@@ -310,7 +310,7 @@ def main():
         "mvp_cage_retainer_ring",
         "mvp_syringe_cage_snap",
         "mvp_syringe_cage_snap_25ml",
-        "mvp_syringe_cage_snap_falcon_funnel",
+        "mvp_syringe_cage_snap_falcon",
       ];
       if (hiddenByDefault.includes(name)) mesh.visible = false;
 
