@@ -613,6 +613,82 @@ def mvp_syringe_cage_snap_25ml():
     return _syringe_cage_snap(p.CAGE_25ML_ID)
 
 
+def mvp_top_lid_falcon():
+    """Lid variant with a side-mounted Ø30.8 mm loop at 120 deg (next to the
+    humid air inlet port) so a 50 mL Falcon tube humidifier slides in from above.
+    Prints upside-down with zero supports.
+    """
+    lid = mvp_top_lid()
+    r_in = p.FALCON_LOOP_ID / 2.0
+    r_out = r_in + p.FALCON_LOOP_WALL
+    z_bot = p.Z_LID_TOP - p.FALCON_LOOP_HEIGHT
+
+    # Neck bridging lid rim (R = 47 mm) to loop outer wall (R = 52.6 mm)
+    neck_start = (p.LID_OD / 2.0) - 2.0
+    neck_end = p.FALCON_LOOP_R - r_in
+    neck_len = neck_end - neck_start
+    neck_mid = (neck_start + neck_end) / 2.0
+    neck = Rot(0, 0, p.FALCON_LOOP_ANGLE_DEG) * Pos(neck_mid, 0, z_bot) * Box(
+        neck_len, 16.0, p.FALCON_LOOP_HEIGHT, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+
+    fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    loop_outer = Pos(fx, fy, z_bot) * Cylinder(
+        r_out, p.FALCON_LOOP_HEIGHT, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    loop_bore = Pos(fx, fy, z_bot - 0.5) * Cylinder(
+        r_in, p.FALCON_LOOP_HEIGHT + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    return (lid + neck + loop_outer) - loop_bore
+
+
+def mvp_falcon_cap_2port():
+    """2-port press-fit cap for a 50 mL Falcon tube humidifier.
+
+    Features an outer Ø31.4 mm skirt + Ø26.0 mm inner sealing plug and two
+    Ø6.0 mm bores (13 mm apart) for air-pump inlet & humidified air outlet.
+    Print upside-down with zero supports.
+    """
+    fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    z_skirt_bot = p.Z_LID_TOP + 0.5
+    skirt_h = 10.0
+    roof_h = 4.5
+    z_roof_bot = z_skirt_bot + skirt_h
+
+    skirt = _tube(p.FALCON_CAP_SKIRT_ID / 2.0, p.FALCON_CAP_OD / 2.0, skirt_h, z_skirt_bot)
+    roof = Pos(0, 0, z_roof_bot) * Cylinder(
+        p.FALCON_CAP_OD / 2.0, roof_h, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    # Inner hollow plug (Ø26.0 mm OD / Ø22.0 mm ID)
+    plug = _tube(11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z_roof_bot - 7.0)
+    cap = skirt + roof + plug
+
+    # 2x Ø6.0 mm tubing bores spaced 13.0 mm apart
+    for dx in (-p.FALCON_CAP_PORT_SPACING / 2.0, p.FALCON_CAP_PORT_SPACING / 2.0):
+        hole = Pos(dx, 0, z_roof_bot - 1.0) * Cylinder(
+            p.AIR_PORT_BORE_DIA / 2.0, roof_h + 2.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        cap = cap - hole
+
+    return Pos(fx, fy, 0.0) * cap
+
+
+def mvp_falcon_50ml_ref():
+    """Reference solid for a 50 mL conical Falcon tube hanging in the lid loop."""
+    fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    z_top = p.Z_LID_TOP + 10.0
+    z_cyl_bot = z_top - 85.0
+    z_tip = z_cyl_bot - 30.0
+
+    cyl = _tube(13.4, 14.8, 85.0, z_cyl_bot)
+    cone_out = _frustum(3.0, 14.8, 30.0, z_tip)
+    cone_in = _frustum(1.6, 13.4, 28.0, z_tip + 2.0)
+    return Pos(fx, fy, 0.0) * (cyl + (cone_out - cone_in))
+
+
 def mvp_fit_test_coupon():
     """15-minute 8 mm tall calibration coupon testing all critical tolerances:
       - 90.5 mm ID outer ring (Uxcell tube OD slide-fit)

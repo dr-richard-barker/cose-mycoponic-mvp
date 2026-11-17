@@ -17,6 +17,8 @@ PARTS_META = [
     ("mvp_bottom_base_collection", "Bottom Base (10 mL Syringe Holder)", "#60a5fa", 1.0, 0.0),
     ("mvp_tube_ref", "Clear Acrylic Tube (85x90x100 mm)", "#67e8f9", 0.28, 1.0),
     ("mvp_top_lid", "Top Lid (Standard Slide-On)", "#10b981", 1.0, 2.0),
+    ("mvp_top_lid_falcon", "Top Lid (50 mL Falcon Loop)", "#14b8a6", 1.0, 2.0),
+    ("mvp_falcon_cap_2port", "Falcon 2-Port Humidifier Cap", "#f59e0b", 1.0, 2.8),
     ("mvp_top_lid_syringe_tower", "Top Lid (50 mL Syringe Tower)", "#10b981", 1.0, 2.0),
     ("mvp_top_lid_syringe_cage", "Top Lid (Compact Center Cage)", "#059669", 1.0, 2.0),
     ("mvp_syringe_tower_addon_half", "Half-Height Syringe Adapter (82.5 mm)", "#34d399", 1.0, 2.0),
@@ -29,6 +31,7 @@ PARTS_META = [
     ("mvp_candle_ref", "4-in Ceramic Filter Candle", "#e2e8f0", 1.0, 3.0),
     ("mvp_syringe_50ml_ref", "50 mL Nutrient Feed Syringe", "#bae6fd", 0.42, 4.0),
     ("mvp_syringe_10ml_ref", "10 mL Collection Syringe", "#bae6fd", 0.42, 0.0),
+    ("mvp_falcon_50ml_ref", "50 mL Falcon Humidifier Tube", "#7dd3fc", 0.40, 2.2),
 ]
 
 
@@ -172,8 +175,8 @@ def main():
       <div class="group-title">Configuration Presets</div>
       <div class="btn-grid">
         <button id="preset-snap50" class="active">Snap-On 50 mL Net</button>
+        <button id="preset-falcon">Falcon Humidifier</button>
         <button id="preset-cage50">50 mL + Retainer</button>
-        <button id="preset-cage25">25 mL + Retainer</button>
         <button id="preset-tower">Full Tower</button>
       </div>
     </div>
@@ -289,6 +292,9 @@ def main():
       meshes[name] = mesh;
 
       const hiddenByDefault = [
+        "mvp_top_lid_falcon",
+        "mvp_falcon_cap_2port",
+        "mvp_falcon_50ml_ref",
         "mvp_top_lid_syringe_tower",
         "mvp_syringe_tower_addon_half",
         "mvp_bottom_base",
@@ -344,8 +350,8 @@ def main():
     }}
     const common = ["mvp_bottom_base_collection", "mvp_tube_ref", "mvp_candle_ref", "mvp_candle_collar", "mvp_syringe_50ml_ref", "mvp_syringe_10ml_ref"];
     document.getElementById("preset-snap50").onclick = () => applyPreset("preset-snap50", [...common, "mvp_top_lid", "mvp_syringe_cage_snap"]);
+    document.getElementById("preset-falcon").onclick = () => applyPreset("preset-falcon", [...common, "mvp_top_lid_falcon", "mvp_falcon_cap_2port", "mvp_falcon_50ml_ref", "mvp_syringe_cage_snap"]);
     document.getElementById("preset-cage50").onclick = () => applyPreset("preset-cage50", [...common, "mvp_top_lid", "mvp_syringe_cage_addon", "mvp_cage_retainer_ring"]);
-    document.getElementById("preset-cage25").onclick = () => applyPreset("preset-cage25", [...common, "mvp_top_lid", "mvp_syringe_cage_addon_25ml", "mvp_cage_retainer_ring"]);
     document.getElementById("preset-tower").onclick = () => applyPreset("preset-tower", [...common, "mvp_top_lid_syringe_tower"]);
 
     const explodeSlider = document.getElementById("explode");

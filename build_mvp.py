@@ -24,6 +24,8 @@ OUT_STEP_DIR = os.path.join(CURRENT_DIR, "out", "step")
 
 PRINT_PARTS = [
     ("mvp_top_lid", parts.mvp_top_lid),
+    ("mvp_top_lid_falcon", parts.mvp_top_lid_falcon),
+    ("mvp_falcon_cap_2port", parts.mvp_falcon_cap_2port),
     ("mvp_top_lid_syringe_tower", parts.mvp_top_lid_syringe_tower),
     ("mvp_top_lid_syringe_cage", parts.mvp_top_lid_syringe_cage),
     ("mvp_syringe_tower_addon", parts.mvp_syringe_tower_addon),
@@ -45,6 +47,7 @@ REF_PARTS = [
     ("mvp_candle_ref", parts.mvp_candle_ref),
     ("mvp_syringe_50ml_ref", parts.mvp_syringe_50ml_ref),
     ("mvp_syringe_10ml_ref", parts.mvp_syringe_10ml_ref),
+    ("mvp_falcon_50ml_ref", parts.mvp_falcon_50ml_ref),
 ]
 
 
@@ -103,6 +106,10 @@ def main():
         ("mvp_top_lid_syringe_tower", "mvp_candle_ref"),
         ("mvp_top_lid_syringe_tower", "mvp_candle_collar"),
         ("mvp_top_lid_syringe_cage", "mvp_tube_ref"),
+        ("mvp_top_lid_falcon", "mvp_tube_ref"),
+        ("mvp_top_lid_falcon", "mvp_falcon_50ml_ref"),
+        ("mvp_falcon_cap_2port", "mvp_falcon_50ml_ref"),
+        ("mvp_top_lid_falcon", "mvp_falcon_cap_2port"),
         ("mvp_candle_collar", "mvp_candle_ref"),
         ("mvp_bottom_base", "mvp_tube_ref"),
         ("mvp_bottom_base", "mvp_candle_ref"),

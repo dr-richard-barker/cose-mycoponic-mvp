@@ -106,6 +106,19 @@ CAGE_ADDON_BASE_ID = 28.0          # Clears Ø26 mm candle washer & wing nut
 CAGE_25ML_ID = 23.5                # Fits standard 25 mL syringe barrel (~22 mm OD)
 
 # ==============================================================================
+# 10. 50 mL Falcon Tube Humidifier Loop & 2-Port Cap
+# ==============================================================================
+FALCON_LOOP_ANGLE_DEG = 120.0      # Adjacent to 120 deg humid air inlet port
+FALCON_LOOP_R = 68.0               # Radial center (outside 49 mm lid & 57 mm base)
+FALCON_LOOP_ID = 30.8              # Slides over ~29.6-30.0 mm Falcon tube body
+FALCON_LOOP_WALL = 3.5             # 37.8 mm OD loop
+FALCON_LOOP_HEIGHT = 12.0          # Flush with Z_LID_TOP for support-free print
+FALCON_CAP_SKIRT_ID = 31.4         # Press-fit over ~30.5-31.0 mm Falcon neck threads
+FALCON_CAP_OD = 36.4               # Wide enough to rest atop the 30.8 mm loop
+FALCON_CAP_PLUG_OD = 26.0          # Inner sealing plug for ~26.8 mm tube mouth ID
+FALCON_CAP_PORT_SPACING = 13.0     # Center-to-center spacing of 2x Ø6.0 mm bores
+
+# ==============================================================================
 # 6. Top Lid & Annular Ports (Placed at R = 33.5 mm, 120 deg apart)
 # ==============================================================================
 LID_OD = BASE_BODY_OD              # 98.0 mm
