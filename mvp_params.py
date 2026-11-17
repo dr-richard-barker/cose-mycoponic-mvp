@@ -108,7 +108,7 @@ CAGE_25ML_ID = 23.5                # Fits standard 25 mL syringe barrel (~22 mm 
 # ==============================================================================
 # 10. 50 mL Falcon Tube Humidifier Loop & 2-Port Cap
 # ==============================================================================
-FALCON_LOOP_ANGLE_DEG = 120.0      # Adjacent to 120 deg humid air inlet port
+FALCON_LOOP_ANGLE_DEG = 300.0      # On 300 deg wing, opposite 75 deg 10 mL syringe & beside 240 deg air port
 FALCON_LOOP_R = 68.0               # Radial center (outside 49 mm lid & 57 mm base)
 FALCON_LOOP_ID = 30.8              # Slides over ~29.6-30.0 mm Falcon tube body
 FALCON_LOOP_WALL = 3.5             # 37.8 mm OD loop
@@ -131,11 +131,11 @@ LUER_TOP_DIA = 4.35
 LUER_BOT_DIA = 3.90
 LUER_THRU_DIA = 3.0
 
-# Port 2 (120 deg): Humid Air Inlet (Snug push-fit for 6 mm OD / 4 mm ID air tubing)
+# Port 2 (240 deg): Humid Air Inlet (Snug push-fit for 6 mm OD / 4 mm ID air tubing)
 AIR_PORT_BORE_DIA = 6.0            # Direct push-fit for 6 mm OD tubing or printable barb
 
-# Port 3 (240 deg): Temp/Humidity Sensor Pass-Through
-SENSOR_PORT_BORE_DIA = 8.0         # Pass-through for wired SHT30/DHT22/probe cable
+# Port 3 (120 deg): Temp/Humidity Sensor Pass-Through
+SENSOR_PORT_BORE_DIA = 10.0        # Pass-through for wired SHT30/SHT31/DHT22 probe & connector
 
 # ==============================================================================
 # 7. Syringe Tower Lid Variant (Supports 50 mL Medical Syringe on Top)

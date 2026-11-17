@@ -97,9 +97,9 @@ def mvp_top_lid():
     )
     lid = lid - luer_socket - luer_thru
 
-    # Port 2 (120 deg): Humid air inlet bore (6.0 mm snug push-fit)
-    px2 = p.PORT_RING_RADIUS * math.cos(math.radians(120.0))
-    py2 = p.PORT_RING_RADIUS * math.sin(math.radians(120.0))
+    # Port 2 (240 deg): Humid air inlet bore (6.0 mm snug push-fit, opposite 75 deg syringe)
+    px2 = p.PORT_RING_RADIUS * math.cos(math.radians(240.0))
+    py2 = p.PORT_RING_RADIUS * math.sin(math.radians(240.0))
     air_bore = Pos(px2, py2, p.Z_TUBE_TOP - 1.0) * Cylinder(
         p.AIR_PORT_BORE_DIA / 2.0,
         p.ROOF_THICKNESS + 2.0,
@@ -107,9 +107,9 @@ def mvp_top_lid():
     )
     lid = lid - air_bore
 
-    # Port 3 (240 deg): Temp/Humidity sensor pass-through bore (8.0 mm)
-    px3 = p.PORT_RING_RADIUS * math.cos(math.radians(240.0))
-    py3 = p.PORT_RING_RADIUS * math.sin(math.radians(240.0))
+    # Port 3 (120 deg): Temp/Humidity sensor pass-through bore (10.0 mm, near 180 deg ESP32 bay)
+    px3 = p.PORT_RING_RADIUS * math.cos(math.radians(120.0))
+    py3 = p.PORT_RING_RADIUS * math.sin(math.radians(120.0))
     sensor_bore = Pos(px3, py3, p.Z_TUBE_TOP - 1.0) * Cylinder(
         p.SENSOR_PORT_BORE_DIA / 2.0,
         p.ROOF_THICKNESS + 2.0,
@@ -199,14 +199,14 @@ def mvp_top_lid_syringe_cage():
         p.LUER_THRU_DIA / 2.0, p.ROOF_THICKNESS + 2.0,
         align=(Align.CENTER, Align.CENTER, Align.MIN),
     )
-    px2 = p.PORT_RING_RADIUS * math.cos(math.radians(120.0))
-    py2 = p.PORT_RING_RADIUS * math.sin(math.radians(120.0))
+    px2 = p.PORT_RING_RADIUS * math.cos(math.radians(240.0))
+    py2 = p.PORT_RING_RADIUS * math.sin(math.radians(240.0))
     air_bore = Pos(px2, py2, p.Z_TUBE_TOP - 1.0) * Cylinder(
         p.AIR_PORT_BORE_DIA / 2.0, p.ROOF_THICKNESS + 2.0,
         align=(Align.CENTER, Align.CENTER, Align.MIN),
     )
-    px3 = p.PORT_RING_RADIUS * math.cos(math.radians(240.0))
-    py3 = p.PORT_RING_RADIUS * math.sin(math.radians(240.0))
+    px3 = p.PORT_RING_RADIUS * math.cos(math.radians(120.0))
+    py3 = p.PORT_RING_RADIUS * math.sin(math.radians(120.0))
     sensor_bore = Pos(px3, py3, p.Z_TUBE_TOP - 1.0) * Cylinder(
         p.SENSOR_PORT_BORE_DIA / 2.0, p.ROOF_THICKNESS + 2.0,
         align=(Align.CENTER, Align.CENTER, Align.MIN),
@@ -611,6 +611,37 @@ def mvp_syringe_cage_snap():
 def mvp_syringe_cage_snap_25ml():
     """Single-piece snap-on 25 mL syringe cage (Ø23.5 mm ID)."""
     return _syringe_cage_snap(p.CAGE_25ML_ID)
+
+
+def mvp_syringe_cage_snap_falcon():
+    """Single-piece Snap-On 50 mL Net with an integrated Ø30.8 mm Falcon tube
+    humidifier loop attached to the 300 deg wing (opposite the 75 deg 10 mL
+    collection syringe and right beside the 240 deg humid air inlet).
+    """
+    cage = mvp_syringe_cage_snap()
+    r_in = p.FALCON_LOOP_ID / 2.0
+    r_out = r_in + p.FALCON_LOOP_WALL
+    z0 = p.Z_LID_TOP
+
+    # Step-down neck from 300 deg wing (Z_LID_TOP..+4, clears lid OD 49 mm & cap R=49.8 mm)
+    # to loop outer wall at Z = Z_LID_TOP - 12..Z_LID_TOP (matches mvp_top_lid_falcon)
+    z_loop_bot = z0 - p.FALCON_LOOP_HEIGHT
+    top_bridge = Rot(0, 0, p.FALCON_LOOP_ANGLE_DEG) * Pos(48.35, 0, z0) * Box(
+        2.7, 16.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    drop_neck = Rot(0, 0, p.FALCON_LOOP_ANGLE_DEG) * Pos(51.2, 0, z_loop_bot) * Box(
+        3.6, 16.0, p.FALCON_LOOP_HEIGHT + 0.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+
+    fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
+    loop_outer = Pos(fx, fy, z_loop_bot) * Cylinder(
+        r_out, p.FALCON_LOOP_HEIGHT, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    loop_bore = Pos(fx, fy, z_loop_bot - 0.5) * Cylinder(
+        r_in, p.FALCON_LOOP_HEIGHT + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    return (cage + top_bridge + drop_neck + loop_outer) - loop_bore
 
 
 def mvp_top_lid_falcon():
