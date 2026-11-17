@@ -355,56 +355,88 @@ def _bottom_base_core(m3_angles):
     return base
 
 
-def mvp_bottom_base():
-    """Standard funneling sump base with M3 Arduino holes in all 3 arched bays."""
-    return _bottom_base_core(p.BAY_ARCH_ANGLES_DEG)
-
-
-def mvp_bottom_base_collection():
-    """Base variant with an integrated 10 mL collection syringe cradle tucked
-    inside the 75 deg arched bay (within the 114 mm OD footprint, zero side tab).
-
-    Two Ø16.4 mm C-clips (45 deg outward-upward snap opening) sit at R = 39.0 mm,
-    Z = 14.0 mm so the syringe barrel tucks neatly beneath the funnel next to
-    the 0 deg drain barb/valve.
-    """
-    base = _bottom_base_core((180.0, 285.0))
-    r_in = p.COLL_SYRINGE_BARREL_ID / 2.0
-    r_out = r_in + p.COLL_CLIP_WALL
-    half_span = p.COLL_CLIP_SPACING / 2.0
-
+def _c_clip_cradle(
+    angle_deg: float,
+    radius_r: float,
+    z_center: float,
+    bore_id: float,
+    spacing: float,
+    wall: float = 3.0,
+    width: float = 10.0,
+    snap_tilt_deg: float = 45.0,
+):
+    """Build twin support-free snap-in C-clips with Z=0 pedestals."""
+    r_in = bore_id / 2.0
+    r_out = r_in + wall
+    half_span = spacing / 2.0
     clips = None
     for dy in (-half_span, half_span):
         clip_outer = (
-            Pos(p.COLL_CRADLE_R, dy, p.COLL_CRADLE_Z)
+            Pos(radius_r, dy, z_center)
             * Rot(90, 0, 0)
-            * Cylinder(r_out, p.COLL_CLIP_WIDTH, align=(Align.CENTER, Align.CENTER, Align.CENTER))
+            * Cylinder(r_out, width, align=(Align.CENTER, Align.CENTER, Align.CENTER))
         )
-        # Pedestal block down to Z = 0.0 mm so outer edge prints flat on build plate
-        clip_ped = Pos(p.COLL_CRADLE_R, dy, 0.0) * Box(
-            r_out * 1.5, p.COLL_CLIP_WIDTH, p.COLL_CRADLE_Z,
-            align=(Align.CENTER, Align.CENTER, Align.MIN),
+        clip_ped = Pos(radius_r, dy, 0.0) * Box(
+            r_out * 1.4, width, z_center, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
         clip_bore = (
-            Pos(p.COLL_CRADLE_R, dy, p.COLL_CRADLE_Z)
+            Pos(radius_r, dy, z_center)
             * Rot(90, 0, 0)
-            * Cylinder(r_in, p.COLL_CLIP_WIDTH + 2.0, align=(Align.CENTER, Align.CENTER, Align.CENTER))
+            * Cylinder(r_in, width + 2.0, align=(Align.CENTER, Align.CENTER, Align.CENTER))
         )
-        # 45 deg outward-upward snap-in opening for effortless side insertion
         snap_slot = (
-            Pos(p.COLL_CRADLE_R, dy, p.COLL_CRADLE_Z)
-            * Rot(0, 45, 0)
+            Pos(radius_r, dy, z_center)
+            * Rot(0, snap_tilt_deg, 0)
             * Box(
-                p.COLL_SYRINGE_BARREL_ID * 0.84,
-                p.COLL_CLIP_WIDTH + 2.0,
+                bore_id * 0.84,
+                width + 2.0,
                 r_out + 4.0,
                 align=(Align.CENTER, Align.CENTER, Align.MIN),
             )
         )
-        one_clip = Rot(0, 0, p.COLL_CRADLE_ANGLE_DEG) * ((clip_outer + clip_ped) - clip_bore - snap_slot)
+        one_clip = Rot(0, 0, angle_deg) * ((clip_outer + clip_ped) - clip_bore - snap_slot)
         clips = one_clip if clips is None else (clips + one_clip)
+    return clips
 
-    return base + clips
+
+def mvp_bottom_base():
+    """Standard funneling sump base with M3 Arduino holes & front air-pump clips."""
+    base = _bottom_base_core(p.BAY_ARCH_ANGLES_DEG)
+    pump_clips = _c_clip_cradle(
+        p.PUMP_CLIP_ANGLE_DEG,
+        p.PUMP_CLIP_R,
+        p.PUMP_CLIP_Z,
+        p.PUMP_BARREL_ID,
+        p.PUMP_CLIP_SPACING,
+        snap_tilt_deg=0.0,
+    )
+    return base + pump_clips
+
+
+def mvp_bottom_base_collection():
+    """Base variant with integrated 10 mL collection syringe cradle (75 deg)
+    and front Ø27.4 mm air-pump snap-in clips (285 deg).
+    """
+    base = _bottom_base_core((180.0, 285.0))
+    syringe_clips = _c_clip_cradle(
+        p.COLL_CRADLE_ANGLE_DEG,
+        p.COLL_CRADLE_R,
+        p.COLL_CRADLE_Z,
+        p.COLL_SYRINGE_BARREL_ID,
+        p.COLL_CLIP_SPACING,
+        wall=p.COLL_CLIP_WALL,
+        width=p.COLL_CLIP_WIDTH,
+        snap_tilt_deg=45.0,
+    )
+    pump_clips = _c_clip_cradle(
+        p.PUMP_CLIP_ANGLE_DEG,
+        p.PUMP_CLIP_R,
+        p.PUMP_CLIP_Z,
+        p.PUMP_BARREL_ID,
+        p.PUMP_CLIP_SPACING,
+        snap_tilt_deg=0.0,
+    )
+    return base + syringe_clips + pump_clips
 
 
 def mvp_port_barb_insert():
@@ -751,17 +783,23 @@ def _pipe(pts, radius: float):
 
 def mvp_electronics_ref():
     """Reference solids for ESP32 (180 deg bay), Relay/MOSFET (285 deg bay),
-    Mini Air Pump, and 5V Power Supply beside the 300 deg Falcon humidifier.
+    Mini Air Pump (clipped into front 285 deg C-clips), and 5V Power Supply.
     """
     esp32 = Pos(-39.0, 0.0, 5.0) * Box(24.0, 48.0, 6.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
-    relay = Rot(0, 0, 285.0) * Pos(39.0, 0.0, 5.0) * Box(
-        20.0, 30.0, 10.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    relay = Rot(0, 0, 285.0) * Pos(30.0, 0.0, 5.0) * Box(
+        18.0, 28.0, 8.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    pump = Pos(95.0, -55.0, 14.0) * Rot(-90, 0, 0) * Cylinder(
-        13.5, 55.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
+    pump = (
+        Rot(0, 0, p.PUMP_CLIP_ANGLE_DEG)
+        * Pos(p.PUMP_CLIP_R, 0.0, p.PUMP_CLIP_Z)
+        * Rot(-90, 0, 0)
+        * Cylinder(13.5, 55.0, align=(Align.CENTER, Align.CENTER, Align.CENTER))
     )
-    pump_nozzle = Pos(95.0, -24.0, 14.0) * Rot(-90, 0, 0) * Cylinder(
-        3.5, 10.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
+    pump_nozzle = (
+        Rot(0, 0, p.PUMP_CLIP_ANGLE_DEG)
+        * Pos(p.PUMP_CLIP_R, 32.0, p.PUMP_CLIP_Z)
+        * Rot(-90, 0, 0)
+        * Cylinder(3.5, 10.0, align=(Align.CENTER, Align.CENTER, Align.CENTER))
     )
     psu = Pos(-95.0, -45.0, 0.0) * Box(38.0, 55.0, 24.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
     return esp32 + relay + pump + pump_nozzle + psu
@@ -800,7 +838,7 @@ def mvp_cables_ref():
         1.3,
     )
     relay_to_pump = _pipe(
-        [(16.0, -39.0, 10.0), (52.0, -52.0, 8.0), (82.0, -55.0, 14.0)],
+        [(10.0, -32.0, 9.0), (14.0, -42.0, 10.0), (14.0, -52.0, 14.0)],
         1.4,
     )
     return psu_to_esp + esp_to_relay + relay_to_pump
@@ -828,34 +866,42 @@ def mvp_plumbing_ref():
         18.0, 4.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
     )
 
-    # Air pump -> Falcon cap Port A + internal dip tube
+    # Air pump -> Falcon cap Port A + internal dip tube (passes cleanly through hole)
     fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
     fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
-    z_cap_top = p.Z_LID_TOP + 14.5
+    z_cap_top = p.Z_LID_TOP + 4.0
     p_a_x = fx - (p.FALCON_CAP_PORT_SPACING / 2.0)
     p_b_x = fx + (p.FALCON_CAP_PORT_SPACING / 2.0)
 
+    # Pump nozzle tip in world coords (285 deg frame, local (54.0, 37.0, 16.0))
+    rad285 = math.radians(p.PUMP_CLIP_ANGLE_DEG)
+    nx = p.PUMP_CLIP_R * math.cos(rad285) - 37.0 * math.sin(rad285)
+    ny = p.PUMP_CLIP_R * math.sin(rad285) + 37.0 * math.cos(rad285)
+
     pump_to_falcon = _pipe(
         [
-            (95.0, -20.0, 14.0),
-            (95.0, -35.0, 55.0),
-            (55.0, -68.0, 192.0),
+            (nx, ny, p.PUMP_CLIP_Z),
+            (nx + 12.0, ny - 12.0, 70.0),
+            (p_a_x, fy - 12.0, 185.0),
+            (p_a_x, fy, z_cap_top + 4.0),
             (p_a_x, fy, z_cap_top),
             (p_a_x, fy, 70.0),
         ],
-        2.8,
+        2.6,
     )
-    # Falcon cap Port B -> main lid 240 deg humid air inlet
+    # Falcon cap Port B -> main lid 240 deg humid air inlet (exits cleanly through hole)
     px2 = p.PORT_RING_RADIUS * math.cos(math.radians(240.0))
     py2 = p.PORT_RING_RADIUS * math.sin(math.radians(240.0))
     falcon_to_lid = _pipe(
         [
             (p_b_x, fy, z_cap_top - 4.0),
-            (p_b_x, fy, 196.0),
-            (8.0, -52.0, 198.0),
+            (p_b_x, fy, z_cap_top + 8.0),
+            (p_b_x, fy, 188.0),
+            (10.0, -48.0, 192.0),
+            (px2, py2, p.Z_LID_TOP + 12.0),
             (px2, py2, p.Z_LID_TOP - 2.0),
         ],
-        2.8,
+        2.6,
     )
     return drain_tube + valve_body + valve_handle + pump_to_falcon + falcon_to_lid
 

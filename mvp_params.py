@@ -118,6 +118,13 @@ FALCON_CAP_OD = 36.4               # Wide enough to rest atop the 30.8 mm loop
 FALCON_CAP_PLUG_OD = 26.0          # Inner sealing plug for ~26.8 mm tube mouth ID
 FALCON_CAP_PORT_SPACING = 13.0     # Center-to-center spacing of 2x Ø6.0 mm bores
 
+# Front Air-Pump Snap-In Cradle (285 deg, directly below 300 deg Falcon humidifier)
+PUMP_CLIP_ANGLE_DEG = 285.0        # Front-right bay, right below Falcon bubbler
+PUMP_CLIP_R = 54.0                 # Flush on front edge of base
+PUMP_CLIP_Z = 16.0                 # Pump centerline height off bench
+PUMP_BARREL_ID = 27.4              # Snap-fit for standard Ø27 mm 5V diaphragm pump
+PUMP_CLIP_SPACING = 32.0           # Center-to-center spacing of the 2 clips
+
 # ==============================================================================
 # 6. Top Lid & Annular Ports (Placed at R = 33.5 mm, 120 deg apart)
 # ==============================================================================
