@@ -617,34 +617,53 @@ def mvp_syringe_cage_snap_25ml():
 
 
 def mvp_syringe_cage_snap_falcon():
-    """Single-piece Snap-On 50 mL Net with an integrated Ø30.8 mm Falcon tube
-    humidifier loop attached to the 300 deg wing (opposite the 75 deg 10 mL
-    collection syringe and right beside the 240 deg humid air inlet).
+    """Single-piece Snap-On 50 mL Net with an integrated 2-port 50 mL Falcon
+    tube cap/holder on the 300 deg wing (opposite the 75 deg 10 mL syringe).
+
+    The 300 deg wing extends straight out at Z = Z_LID_TOP..+4.0 as the cap
+    roof with two Ø6.0 mm tubing bores, while the Ø31.4 mm press-fit skirt and
+    Ø26.0 mm inner sealing plug hang below so the Falcon tube pushes up into it.
     """
     cage = mvp_syringe_cage_snap()
-    r_in = p.FALCON_LOOP_ID / 2.0
-    r_out = r_in + p.FALCON_LOOP_WALL
     z0 = p.Z_LID_TOP
-
-    # Step-down neck from 300 deg wing (Z_LID_TOP..+4, clears lid OD 49 mm & cap R=49.8 mm)
-    # to loop outer wall at Z = Z_LID_TOP - 12..Z_LID_TOP (matches mvp_top_lid_falcon)
-    z_loop_bot = z0 - p.FALCON_LOOP_HEIGHT
-    top_bridge = Rot(0, 0, p.FALCON_LOOP_ANGLE_DEG) * Pos(48.35, 0, z0) * Box(
-        2.7, 16.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-    drop_neck = Rot(0, 0, p.FALCON_LOOP_ANGLE_DEG) * Pos(51.2, 0, z_loop_bot) * Box(
-        3.6, 16.0, p.FALCON_LOOP_HEIGHT + 0.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-
     fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
     fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
-    loop_outer = Pos(fx, fy, z_loop_bot) * Cylinder(
-        r_out, p.FALCON_LOOP_HEIGHT, align=(Align.CENTER, Align.CENTER, Align.MIN)
+
+    # Flat bridge from 300 deg wing (R = 47) to Falcon cap center (R = 68) at Z = z0..z0+4
+    bridge_len = p.FALCON_LOOP_R - 46.0
+    bridge_mid = (p.FALCON_LOOP_R + 46.0) / 2.0
+    bridge = Rot(0, 0, p.FALCON_LOOP_ANGLE_DEG) * Pos(bridge_mid, 0, z0) * Box(
+        bridge_len, 20.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    loop_bore = Pos(fx, fy, z_loop_bot - 0.5) * Cylinder(
-        r_in, p.FALCON_LOOP_HEIGHT + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    # 45-deg support-free gusset from cage/wing to cap edge (R = 49.8)
+    gusset_prof = Polygon((34.0, 0.0), (52.0, 0.0), (34.0, 18.0), align=None)
+    gusset = (
+        Rot(0, 0, p.FALCON_LOOP_ANGLE_DEG)
+        * Pos(0, 0, z0 + 4.0)
+        * Rot(90, 0, 0)
+        * extrude(gusset_prof, amount=3.0, both=True)
     )
-    return (cage + top_bridge + drop_neck + loop_outer) - loop_bore
+
+    # Integrated 2-port Falcon cap (roof at z0..z0+4, skirt & plug hanging down)
+    cap_roof = Pos(fx, fy, z0) * Cylinder(
+        p.FALCON_CAP_OD / 2.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    cap_skirt = Pos(fx, fy, 0.0) * _tube(
+        p.FALCON_CAP_SKIRT_ID / 2.0, p.FALCON_CAP_OD / 2.0, 10.0, z0 - 10.0
+    )
+    cap_plug = Pos(fx, fy, 0.0) * _tube(
+        11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 - 7.0
+    )
+    merged = cage + bridge + gusset + cap_roof + cap_skirt + cap_plug
+
+    # Two Ø6.0 mm tubing bores spaced 13.0 mm apart through the cap roof
+    for dx in (-p.FALCON_CAP_PORT_SPACING / 2.0, p.FALCON_CAP_PORT_SPACING / 2.0):
+        hole = Pos(fx + dx, fy, z0 - 1.0) * Cylinder(
+            p.AIR_PORT_BORE_DIA / 2.0, 6.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        merged = merged - hole
+
+    return merged
 
 
 def mvp_top_lid_falcon():

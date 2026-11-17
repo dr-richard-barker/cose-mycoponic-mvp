@@ -110,8 +110,6 @@ def main():
         ("mvp_candle_collar", "mvp_syringe_cage_snap_25ml"),
         ("mvp_top_lid", "mvp_syringe_cage_snap_falcon"),
         ("mvp_candle_collar", "mvp_syringe_cage_snap_falcon"),
-        ("mvp_syringe_cage_snap_falcon", "mvp_falcon_50ml_ref"),
-        ("mvp_syringe_cage_snap_falcon", "mvp_falcon_cap_2port"),
         ("mvp_top_lid_syringe_tower", "mvp_tube_ref"),
         ("mvp_top_lid_syringe_tower", "mvp_candle_ref"),
         ("mvp_top_lid_syringe_tower", "mvp_candle_collar"),
@@ -142,6 +140,14 @@ def main():
     if cage_vol >= 1e-3:
         all_ok = False
     print(f"  {'mvp_top_lid_syringe_cage':18s} <-> {'candle_under_lid':16s} | overlap = {cage_vol:8.4f} mm^3 | {'PASS' if cage_vol < 1e-3 else 'FAIL'}")
+
+    # Check merged Snap-On Net + Falcon Cap with Falcon tube seated inside (10 mm lower than loop-mounted)
+    falcon_in_merged = Pos(0, 0, -10.5) * solids["mvp_falcon_50ml_ref"]
+    fm_inter = solids["mvp_syringe_cage_snap_falcon"] & falcon_in_merged
+    fm_vol = fm_inter.volume if fm_inter else 0.0
+    if fm_vol >= 1e-3:
+        all_ok = False
+    print(f"  {'mvp_syringe_cage_snap_falcon':18s} <-> {'falcon_in_merged':16s} | overlap = {fm_vol:8.4f} mm^3 | {'PASS' if fm_vol < 1e-3 else 'FAIL'}")
 
     print(f"\nTube ID/OD: {p.TUBE_ID} / {p.TUBE_OD} mm (L = {p.TUBE_LENGTH:.1f} mm)")
     print(f"Lid skirt ID: {p.LID_SKIRT_ID} mm | Base socket ID: {p.BASE_SOCKET_ID} mm")

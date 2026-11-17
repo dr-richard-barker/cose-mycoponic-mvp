@@ -6,10 +6,9 @@
 |---|---|---|---|---|
 | 1 | `mvp_top_lid.stl` | 48.4 cm³ | ~61 g | Upside-down; 90.5 mm skirt, Ø58.5 mm collar pocket, 3 ports + 3 indents |
 | 2 | `mvp_candle_collar.stl` | 10.0 cm³ | ~13 g | Flat; bolts to ceramic candle stem in the open |
-| 3 | `mvp_syringe_cage_snap_falcon.stl` | 38.5 cm³ | ~49 g | Upside-down; 1-piece 50 mL net + 3-pin snap base + 300° Falcon loop |
-| 4 | `mvp_falcon_cap_2port.stl` | 8.1 cm³ | ~10 g | Upside-down; press-fit 50 mL Falcon cap with 2× Ø6.0 mm tubing bores |
-| 5 | `mvp_bottom_base_collection.stl` | 212.8 cm³ | ~270 g | Upright (5 walls, 100% infill); 38.5° funnel, 20 mm drain, 3 bays, 10 mL clips |
-| 6 | `mvp_fit_test_coupon.stl` | 21.2 cm³ | ~27 g | Flat (~15 min test print for tube, candle, Luer, air tube & M3 tolerances) |
+| 3 | `mvp_syringe_cage_snap_falcon.stl` | 42.1 cm³ | ~53 g | Upside-down; 1-piece 50 mL net + 3-pin snap base + integrated 2-port Falcon cap |
+| 4 | `mvp_bottom_base_collection.stl` | 212.8 cm³ | ~270 g | Upright (5 walls, 100% infill); 38.5° funnel, 20 mm drain, 3 bays, 10 mL clips |
+| 5 | `mvp_fit_test_coupon.stl` | 21.2 cm³ | ~27 g | Flat (~15 min test print for tube, candle, Luer, air tube & M3 tolerances) |
 
 *(Optional alternative variants in `out/stl/`: `mvp_top_lid_falcon.stl`, `mvp_syringe_cage_snap.stl`, `mvp_syringe_cage_snap_25ml.stl`, `mvp_syringe_tower_addon.stl`, `mvp_syringe_tower_addon_half.stl`, `mvp_top_lid_syringe_tower.stl`, `mvp_top_lid_syringe_cage.stl`, `mvp_cage_retainer_ring.stl`, `mvp_bottom_base.stl`, `mvp_port_barb_insert.stl`.)*
 

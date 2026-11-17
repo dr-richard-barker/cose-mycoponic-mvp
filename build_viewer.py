@@ -298,6 +298,7 @@ def main():
 
       const hiddenByDefault = [
         "mvp_top_lid_falcon",
+        "mvp_falcon_cap_2port",
         "mvp_top_lid_syringe_tower",
         "mvp_syringe_tower_addon_half",
         "mvp_bottom_base",
@@ -353,10 +354,10 @@ def main():
       }}
     }}
     const common = ["mvp_bottom_base_collection", "mvp_tube_ref", "mvp_candle_ref", "mvp_candle_collar", "mvp_syringe_50ml_ref", "mvp_syringe_10ml_ref"];
-    const sysParts = ["mvp_top_lid", "mvp_syringe_cage_snap_falcon", "mvp_falcon_cap_2port", "mvp_falcon_50ml_ref", "mvp_electronics_ref", "mvp_sensor_probe_ref", "mvp_cables_ref", "mvp_plumbing_ref"];
+    const sysParts = ["mvp_top_lid", "mvp_syringe_cage_snap_falcon", "mvp_falcon_50ml_ref", "mvp_electronics_ref", "mvp_sensor_probe_ref", "mvp_cables_ref", "mvp_plumbing_ref"];
     document.getElementById("preset-fullsys").onclick = () => applyPreset("preset-fullsys", [...common, ...sysParts]);
     document.getElementById("preset-snap50").onclick = () => applyPreset("preset-snap50", [...common, "mvp_top_lid", "mvp_syringe_cage_snap"]);
-    document.getElementById("preset-falcon").onclick = () => applyPreset("preset-falcon", [...common, "mvp_top_lid", "mvp_syringe_cage_snap_falcon", "mvp_falcon_cap_2port", "mvp_falcon_50ml_ref"]);
+    document.getElementById("preset-falcon").onclick = () => applyPreset("preset-falcon", [...common, "mvp_top_lid", "mvp_syringe_cage_snap_falcon", "mvp_falcon_50ml_ref"]);
     document.getElementById("preset-tower").onclick = () => applyPreset("preset-tower", [...common, "mvp_top_lid_syringe_tower"]);
 
     const explodeSlider = document.getElementById("explode");
