@@ -93,12 +93,17 @@ COLL_CRADLE_Z = 14.0               # Syringe centerline height off table
 # ==============================================================================
 # 9. Compact Center Syringe-Cage Lid Variant (Holds 50 mL Syringe Shaft)
 # ==============================================================================
-CAGE_ID = 32.0                     # Holds 50 mL syringe barrel (~30 mm OD) centered
-CAGE_WALL = 3.0                    # 38.0 mm OD cage wall
-CAGE_HEIGHT = 45.0                 # ~45 mm tall compact central cage
+CAGE_ID = 33.5                     # Fits all 50/60 mL syringe barrels (~29.5-31.8 mm OD)
+CAGE_WALL = 3.0                    # 39.5 mm OD cage wall
+CAGE_HEIGHT = 55.0                 # +10 mm taller (55 mm) for extra syringe stability
 CAGE_RING_HEIGHT = 5.0             # Bottom & top ring height
 CAGE_NUM_RIBS = 4                  # 4 vertical pillars (90 deg apart) for wide finger access
 CAGE_RIB_WIDTH = 6.5               # 6.5 mm wide pillars -> ~18 mm wide windows to tighten wing nut
+
+# 1/4" BSP (G 1/4, 19 TPI) Internal Thread for AquaEasy 4" Ceramic Candle Stem
+BSP14_ROOT_ID = 13.4               # Major/root ID (> 13.157 mm G 1/4 major OD)
+BSP14_PITCH = 1.337                # 25.4 / 19 TPI = 1.337 mm pitch
+BSP14_DEPTH = 0.8                  # 45-deg support-free internal ridge (crest Ø11.8 mm)
 
 # Glue-on syringe cage add-on (mates onto Ø58 mm mvp_candle_collar)
 CAGE_ADDON_BASE_OD = CANDLE_COLLAR_OD  # 58.0 mm

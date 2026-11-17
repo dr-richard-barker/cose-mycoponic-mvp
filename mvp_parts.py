@@ -578,7 +578,7 @@ def mvp_cage_retainer_ring():
     ring_outer = Pos(0, 0, z_bot) * Cylinder(
         r_out, h_ring, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    ring_inner = _frustum(27.5, 19.5, h_ring + 0.2, z_bot - 0.1)
+    ring_inner = _frustum(27.5, 20.25, h_ring + 0.2, z_bot - 0.1)
     retainer = ring_outer - ring_inner
 
     # 3 radial arms at 60/180/300 deg with downward Ø14.0 mm plug-in pins
@@ -698,34 +698,44 @@ def mvp_syringe_cage_snap_falcon():
 
 
 def mvp_syringe_cage_snap_falcon_funnel():
-    """New Snap-On 50 mL Net variant with an integrated hollow 2-funnel
-    (biconical) chamber + 300 deg Falcon cap:
-      - Bottom funnel screws onto the 4-in ceramic candle stem (1/4" BSP)
+    """New Snap-On 50 mL Net variant (Ø33.5 mm ID x 55 mm tall) with an
+    integrated hollow 2-funnel (biconical) chamber + 300 deg Falcon cap:
+      - Bottom funnel: 1/4" BSP (19 TPI, 1.337 mm pitch) internal screw socket
+        that screws directly onto the 4-in ceramic candle stem
       - Wide middle belly (Ø28 mm OD / Ø23 mm ID) braced to the 3 net struts
-      - Top funnel ends in a Female Luer Lock port for screwing in a 50 mL syringe
+      - Top funnel: ISO 80369-7 Female Luer-Lock (Ø6.7 mm hub, Ø7.8 mm ears)
+        for screwing in a 50 mL Luer-Lock syringe
     """
     net = mvp_syringe_cage_snap_falcon()
     z0 = p.Z_LID_TOP
 
-    # Bottom 1/4" BSP female socket boss (Ø18 mm OD, Ø12.2 mm bore)
-    bot_boss = _tube(6.1, 9.0, 8.0, z0 + 2.0)
-    # Bottom 45-deg funnel (Ø18 -> Ø28 mm OD, Ø12.2 -> Ø23 mm ID)
-    bot_cone_out = _frustum(9.0, 14.0, 5.0, z0 + 10.0)
-    bot_cone_in = _frustum(6.1, 11.5, 5.2, z0 + 9.9)
+    # Bottom 1/4" BSP (19 TPI) internal-threaded socket boss (Ø20 mm OD, z0+1..+10)
+    bot_boss = _internal_thread(
+        p.BSP14_ROOT_ID / 2.0,
+        10.0,
+        z0 + 1.0,
+        9.0,
+        p.BSP14_PITCH,
+        p.BSP14_DEPTH,
+        tooth_half_base=0.55,
+    )
+    # Bottom 45-deg funnel (Ø20 -> Ø28 mm OD, Ø13.4 -> Ø23 mm ID)
+    bot_cone_out = _frustum(10.0, 14.0, 4.0, z0 + 10.0)
+    bot_cone_in = _frustum(p.BSP14_ROOT_ID / 2.0, 11.5, 4.2, z0 + 9.9)
     # Middle belly band (Ø28 mm OD / Ø23 mm ID)
-    belly = _tube(11.5, 14.0, 2.0, z0 + 15.0)
-    # Top 45-deg funnel (Ø28 -> Ø9.0 mm OD, Ø23 -> Ø3.0 mm ID)
-    top_cone_out = _frustum(14.0, 4.5, 9.5, z0 + 17.0)
-    top_cone_in = _frustum(11.5, 1.5, 9.7, z0 + 16.9)
-    # Top Female Luer Lock boss + twin lock ears (Z = z0+20.5..z0+28.0)
-    luer_boss = Pos(0, 0, z0 + 20.5) * Cylinder(
-        4.5, 7.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    belly = _tube(11.5, 14.0, 2.5, z0 + 14.0)
+    # Top 45-deg funnel (Ø28 -> Ø6.7 mm hub OD, Ø23 -> Ø3.0 mm ID)
+    top_cone_out = _frustum(14.0, 3.35, 10.5, z0 + 16.5)
+    top_cone_in = _frustum(11.5, 1.5, 10.7, z0 + 16.4)
+    # Top ISO 80369-7 Female Luer-Lock hub (Ø6.7 mm OD, Ø7.8 mm x 1.2 mm ears)
+    luer_boss = Pos(0, 0, z0 + 21.0) * Cylinder(
+        3.35, 7.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    luer_ears = Pos(0, 0, z0 + 26.5) * Box(
-        10.4, 3.6, 1.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    luer_ears = Pos(0, 0, z0 + 27.3) * Box(
+        7.8, 2.6, 1.2, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    luer_taper = Pos(0, 0, z0 + 20.5) * Cone(
-        p.LUER_BOT_DIA / 2.0, p.LUER_TOP_DIA / 2.0, 7.8,
+    luer_taper = Pos(0, 0, z0 + 21.0) * Cone(
+        3.90 / 2.0, 4.30 / 2.0, 7.7,
         align=(Align.CENTER, Align.CENTER, Align.MIN),
     )
 
@@ -738,11 +748,11 @@ def mvp_syringe_cage_snap_falcon_funnel():
         + luer_ears
     ) - luer_taper
 
-    # 3 radial webs (60/180/300 deg) bracing the Ø28 mm belly into the 3 net struts
+    # 3 radial webs (60/180/300 deg) bracing the Ø28 mm belly into Ø33.5 mm net struts
     webs = None
     for deg in (60.0, 180.0, 300.0):
-        web = Rot(0, 0, deg) * Pos(15.2, 0, z0 + 13.5) * Box(
-            4.0, 4.5, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        web = Rot(0, 0, deg) * Pos(16.0, 0, z0 + 13.0) * Box(
+            5.0, 4.5, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
         webs = web if webs is None else (webs + web)
 
@@ -779,24 +789,43 @@ def mvp_top_lid_falcon():
     return (lid + neck + loop_outer) - loop_bore
 
 
-def _falcon_threaded_skirt(z_bot: float, height: float = 10.0):
-    """Build a Ø38 mm Falcon cap skirt with internal 45-deg helical thread ridges."""
-    r_root = p.FALCON_CAP_SKIRT_ID / 2.0
-    r_out = p.FALCON_CAP_OD / 2.0
+def _internal_thread(
+    r_root: float,
+    r_out: float,
+    z_bot: float,
+    height: float,
+    pitch: float,
+    depth: float,
+    tooth_half_base: float = 1.1,
+):
+    """Build a support-free internal 45-deg helical thread inside a cylindrical wall."""
     skirt = _tube(r_root, r_out, height, z_bot)
-
-    thread_h = height - 2.6
-    helix = Pos(0, 0, z_bot + 1.3) * Helix(
-        pitch=p.FALCON_THREAD_PITCH, height=thread_h, radius=r_root
+    margin = tooth_half_base + 0.2
+    thread_h = max(pitch, height - 2.0 * margin)
+    helix = Pos(0, 0, z_bot + margin) * Helix(
+        pitch=pitch, height=thread_h, radius=r_root
     )
-    tooth = Plane.XZ * Pos(0, z_bot + 1.3) * Polygon(
-        (r_root + 0.3, -1.1),
-        (r_root - p.FALCON_THREAD_DEPTH, 0.0),
-        (r_root + 0.3, 1.1),
+    tooth = Plane.XZ * Pos(0, z_bot + margin) * Polygon(
+        (r_root + 0.3, -tooth_half_base),
+        (r_root - depth, 0.0),
+        (r_root + 0.3, tooth_half_base),
         align=None,
     )
     ridge = sweep(tooth, path=helix, is_frenet=True)
     return skirt + ridge
+
+
+def _falcon_threaded_skirt(z_bot: float, height: float = 10.0):
+    """Build a Ø38 mm Falcon cap skirt with internal 45-deg helical thread ridges."""
+    return _internal_thread(
+        p.FALCON_CAP_SKIRT_ID / 2.0,
+        p.FALCON_CAP_OD / 2.0,
+        z_bot,
+        height,
+        p.FALCON_THREAD_PITCH,
+        p.FALCON_THREAD_DEPTH,
+        tooth_half_base=1.1,
+    )
 
 
 def mvp_falcon_cap_2port():
