@@ -733,17 +733,48 @@ def mvp_syringe_cage_snap_falcon_funnel():
     r_base_out = p.CAGE_ADDON_BASE_OD / 2.0
     wing_angles = (60.0, 180.0, 300.0)
 
-    # 1. Snap-in base ring (Ø20 mm ID to Ø58 mm OD, z0..z0+3) + 3 wings with Ø14.2 mm pin holes
+    # 1. Snap-in base ring (Ø20 mm ID to Ø58 mm OD, z0..z0+3) + 3 curved Ø21 mm wing lobes + wrap-around gussets
     base = _tube(10.0, r_base_out, 3.0, z0)
-    arm_len = (p.LID_OD / 2.0) - (r_base_out - 2.0)
-    r_arm_mid = (p.LID_OD / 2.0 + (r_base_out - 2.0)) / 2.0
+    r_hole = (p.SYRINGE_PILLAR_DIA + 0.2) / 2.0  # 7.1 mm (Ø14.2 mm)
+    r_boss = 10.5  # Ø21.0 mm curved outer boss (3.4 mm wall around hole)
+    r_wing_in = r_base_out - 2.0
     for deg in wing_angles:
-        arm = Rot(0, 0, deg) * Pos(r_arm_mid, 0, z0) * Box(
-            arm_len, 16.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        arm_rect = Pos(0, 0, z0) * extrude(
+            Polygon(
+                (r_wing_in, -r_boss),
+                (p.SYRINGE_PILLAR_RING_R, -r_boss),
+                (p.SYRINGE_PILLAR_RING_R, r_boss),
+                (r_wing_in, r_boss),
+                align=None,
+            ),
+            amount=4.0,
         )
-        gusset_prof = Polygon((17.5, 0.0), (49.0, 0.0), (17.5, 31.5), align=None)
-        gusset_3d = Pos(0, 0, z0 + 3.0) * Rot(90, 0, 0) * extrude(gusset_prof, amount=3.0, both=True)
-        base = base + arm + (Rot(0, 0, deg) * gusset_3d)
+        arm_boss = Pos(p.SYRINGE_PILLAR_RING_R, 0, z0) * Cylinder(
+            r_boss, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        arm = arm_rect + arm_boss
+
+        # Wishbone gusset: flows around both edges of the Ø21 mm circle without overhanging the hole
+        stem = extrude(
+            Polygon((17.5, -3.0), (33.5, -3.0), (33.5, 3.0), (17.5, 3.0), align=None),
+            amount=32.0,
+        )
+        rib_pos = extrude(
+            Polygon((27.5, 2.8), (42.5, r_boss - 0.8), (42.5, r_hole - 0.3), (30.5, 0.5), align=None),
+            amount=32.0,
+        )
+        rib_neg = extrude(
+            Polygon((27.5, -2.8), (42.5, -(r_boss - 0.8)), (42.5, -(r_hole - 0.3)), (30.5, -0.5), align=None),
+            amount=32.0,
+        )
+        collar_ring = Pos(p.SYRINGE_PILLAR_RING_R, 0, 0.0) * _tube(r_hole - 0.2, r_boss - 0.1, 32.0, 0.0)
+        wedge = Rot(90, 0, 0) * extrude(
+            Polygon((17.5, 0.0), (47.5, 0.0), (17.5, 30.0), align=None),
+            amount=15.0,
+            both=True,
+        )
+        gusset_3d = Pos(0, 0, z0 + 3.2) * ((stem + rib_pos + rib_neg + collar_ring) & wedge)
+        base = base + (Rot(0, 0, deg) * (arm + gusset_3d))
 
     # 2. Integrated 300 deg threaded 50 mL Falcon cap (skirt bottom flush at z0, roof at z0+10..+14)
     fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
@@ -765,7 +796,7 @@ def mvp_syringe_cage_snap_falcon_funnel():
         px = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
         py = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
         pin_hole = Pos(px, py, z0) * Cylinder(
-            (p.SYRINGE_PILLAR_DIA + 0.2) / 2.0, 4.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+            r_hole, 40.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
         base = base - pin_hole
     for dx in (-p.FALCON_CAP_PORT_SPACING / 2.0, p.FALCON_CAP_PORT_SPACING / 2.0):
