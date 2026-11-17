@@ -729,7 +729,7 @@ def mvp_syringe_cage_snap_falcon_funnel():
         gusset_3d = Pos(0, 0, z0 + 3.0) * Rot(90, 0, 0) * extrude(gusset_prof, amount=3.0, both=True)
         base = (base + arm + (Rot(0, 0, deg) * gusset_3d)) - pin_hole
 
-    # 2. Integrated 300 deg threaded 50 mL Falcon cap (flat roof at z0..+4, skirt pointing UP)
+    # 2. Integrated 300 deg threaded 50 mL Falcon cap (roof at z0..+4, skirt facing DOWN)
     fx = p.FALCON_LOOP_R * math.cos(math.radians(p.FALCON_LOOP_ANGLE_DEG))
     fy = p.FALCON_LOOP_R * math.sin(math.radians(p.FALCON_LOOP_ANGLE_DEG))
     bridge_len = p.FALCON_LOOP_R - 46.0
@@ -740,8 +740,8 @@ def mvp_syringe_cage_snap_falcon_funnel():
     cap_roof = Pos(fx, fy, z0) * Cylinder(
         p.FALCON_CAP_OD / 2.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    cap_skirt = Pos(fx, fy, 0.0) * _falcon_threaded_skirt(z0 + 4.0, 10.0)
-    cap_plug = Pos(fx, fy, 0.0) * _tube(11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 + 4.0)
+    cap_skirt = Pos(fx, fy, 0.0) * _falcon_threaded_skirt(z0 - 10.0, 10.0)
+    cap_plug = Pos(fx, fy, 0.0) * _tube(11.0, p.FALCON_CAP_PLUG_OD / 2.0, 7.0, z0 - 7.0)
     base = base + bridge + cap_roof + cap_skirt + cap_plug
     for dx in (-p.FALCON_CAP_PORT_SPACING / 2.0, p.FALCON_CAP_PORT_SPACING / 2.0):
         hole = Pos(fx + dx, fy, z0 - 1.0) * Cylinder(
