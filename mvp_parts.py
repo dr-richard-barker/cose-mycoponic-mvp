@@ -725,7 +725,7 @@ def mvp_syringe_cage_snap_falcon_funnel():
         pin = Pos(px, py, z0 - 4.2) * Cylinder(
             p.SYRINGE_PILLAR_DIA / 2.0, 8.2, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
-        gusset_prof = Polygon((26.0, 0.0), (49.0, 0.0), (26.0, 23.0), align=None)
+        gusset_prof = Polygon((17.5, 0.0), (49.0, 0.0), (17.5, 31.5), align=None)
         gusset_3d = Pos(0, 0, z0 + 3.0) * Rot(90, 0, 0) * extrude(gusset_prof, amount=3.0, both=True)
         base = base + arm + pin + (Rot(0, 0, deg) * gusset_3d)
 
