@@ -289,17 +289,28 @@ def _bottom_base_core(m3_angles):
     )
     base = base - funnel_cut - sump_well
 
-    # Add side-exit 1/4" hose barb along +X at Z = DRAIN_CENTER_Z
-    x_start = r_body - 2.0
-    shaft_len = p.DRAIN_BARB_LEN + 2.0
+    # Carve a curved Ø16 mm clearance notch into the base foot flange around 0 deg
+    # so silicone tubing can push onto the full 16 mm barb depth up to r_body
+    flange_notch_cyl = Pos(r_body + 8.0, 0, -0.5) * Cylinder(
+        8.0, 22.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    flange_notch_slot = Pos(r_body + 8.0, 0, -0.5) * Box(
+        (r_flange - r_body) + 4.0, 16.0, 22.0, align=(Align.MIN, Align.CENTER, Align.MIN)
+    )
+    base = base - flange_notch_cyl - flange_notch_slot
+
+    # Add downward-sloped (8.5 deg) side-exit 1/4" hose barb along +X
+    x_start = r_body - 4.0
+    shaft_len = p.DRAIN_BARB_LEN + 4.0
+    drain_xform = Pos(0, 0, p.DRAIN_CENTER_Z) * Rot(0, p.DRAIN_SLOPE_DEG, 0)
     barb_shaft = (
-        Pos(x_start, 0, p.DRAIN_CENTER_Z)
+        Pos(x_start, 0, 0)
         * Rot(0, 90, 0)
         * Cylinder(p.DRAIN_BARB_SHAFT_OD / 2.0, shaft_len, align=(Align.CENTER, Align.CENTER, Align.MIN))
     )
     # Two retention barb cones along the shaft
     barb_tip = (
-        Pos(r_body + p.DRAIN_BARB_LEN - 5.0, 0, p.DRAIN_CENTER_Z)
+        Pos(r_body + p.DRAIN_BARB_LEN - 5.0, 0, 0)
         * Rot(0, 90, 0)
         * Cone(
             p.DRAIN_BARB_RIB_OD / 2.0,
@@ -309,7 +320,7 @@ def _bottom_base_core(m3_angles):
         )
     )
     barb_mid = (
-        Pos(r_body + p.DRAIN_BARB_LEN - 11.0, 0, p.DRAIN_CENTER_Z)
+        Pos(r_body + p.DRAIN_BARB_LEN - 11.0, 0, 0)
         * Rot(0, 90, 0)
         * Cone(
             p.DRAIN_BARB_RIB_OD / 2.0,
@@ -318,19 +329,12 @@ def _bottom_base_core(m3_angles):
             align=(Align.CENTER, Align.CENTER, Align.MIN),
         )
     )
-    # Support-free triangular/rectangular gusset under the neck of the barb (up to flange edge)
-    gusset = Pos(r_body - 1.0, 0, 0) * Box(
-        (r_flange - r_body) + 2.0,
-        p.DRAIN_BARB_SHAFT_OD,
-        p.DRAIN_CENTER_Z,
-        align=(Align.MIN, Align.CENTER, Align.MIN),
-    )
 
-    base = base + barb_shaft + barb_tip + barb_mid + gusset
+    base = base + (drain_xform * (barb_shaft + barb_tip + barb_mid))
 
-    # Cut horizontal drain bore from X = 0 all the way out through the barb
-    drain_bore = (
-        Pos(-1.0, 0, p.DRAIN_CENTER_Z)
+    # Cut downward-sloped drain bore from X = 0 all the way out through the barb
+    drain_bore = drain_xform * (
+        Pos(-1.0, 0, 0)
         * Rot(0, 90, 0)
         * Cylinder(r_drain, r_body + p.DRAIN_BARB_LEN + 2.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
     )
@@ -1049,13 +1053,13 @@ def mvp_plumbing_ref():
         -48.0 * math.cos(math.radians(p.COLL_CRADLE_ANGLE_DEG))
     )
     drain_tube = _pipe(
-        [(62.0, 0.0, 20.0), (77.0, 9.0, 19.0), (74.0, 26.0, 16.0), (syr_x, syr_y, p.COLL_CRADLE_Z)],
+        [(64.0, 0.0, 8.2), (76.0, 10.0, 9.5), (74.0, 26.0, 12.0), (syr_x, syr_y, p.COLL_CRADLE_Z)],
         3.2,
     )
-    valve_body = Pos(75.5, 17.5, 18.0) * Rot(0, 90, 110) * Cylinder(
+    valve_body = Pos(75.0, 18.0, 10.8) * Rot(0, 90, 110) * Cylinder(
         6.0, 20.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
     )
-    valve_handle = Pos(75.5, 17.5, 25.0) * Rot(0, 0, 20) * Box(
+    valve_handle = Pos(75.0, 18.0, 17.8) * Rot(0, 0, 20) * Box(
         18.0, 4.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
     )
 

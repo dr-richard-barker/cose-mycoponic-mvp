@@ -63,7 +63,8 @@ BASE_FLANGE_OD = 114.0             # Wide foot flange for benchtop stability
 BASE_SOCKET_ID = TUBE_OD + 2.0 * SLIDE_CLEARANCE_RADIAL  # 90.5 mm
 
 DRAIN_BORE_DIA = 4.5               # Internal drain channel diameter
-DRAIN_CENTER_Z = FUNNEL_APEX_Z + DRAIN_BORE_DIA / 2.0  # 10.25 mm
+DRAIN_CENTER_Z = FUNNEL_APEX_Z     # 17.75 mm at X = 0 (slopes down along +X)
+DRAIN_SLOPE_DEG = 8.5              # Downward slope so liquids drain cleanly
 DRAIN_BARB_LEN = 16.0              # Protrusion from base body OD for 1/4" ID tubing
 DRAIN_BARB_SHAFT_OD = 6.5          # Fits standard 1/4" (6.35 mm) ID silicone tubing
 DRAIN_BARB_RIB_OD = 7.4            # Retention barb ridge OD
