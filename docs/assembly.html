@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CoSE Mycoponic MVP — Step-by-Step Build, Wiring &amp; Software Guide</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --surface: #111827;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --green: #10b981;
+      --amber: #f59e0b;
+      --red: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+    header {
+      padding: 40px 24px 28px;
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 { font-size: 1.85rem; font-weight: 800; letter-spacing: -0.02em; }
+    .subtitle { color: var(--muted); max-width: 680px; margin-top: 6px; font-size: 0.95rem; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      display: inline-block;
+      padding: 9px 15px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      color: #fff;
+      background: var(--accent);
+      border: 1px solid #60a5fa;
+    }
+    .btn.secondary { background: var(--card); border-color: var(--border); color: var(--text); }
+    main { max-width: 1080px; margin: 0 auto; padding: 28px 24px 64px; display: flex; flex-direction: column; gap: 36px; }
+    h2 { font-size: 1.3rem; margin-bottom: 12px; color: #f8fafc; display: flex; align-items: center; gap: 10px; }
+    .time-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+    .alert {
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      border-left: 4px solid var(--amber);
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .alert.danger { border-left-color: var(--red); background: rgba(239, 68, 68, 0.1); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; text-align: left; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid #293548; vertical-align: top; }
+    th { color: #f8fafc; font-weight: 700; }
+    td { color: var(--muted); }
+    td strong, li strong { color: var(--text); }
+    ol, ul { padding-left: 20px; display: flex; flex-direction: column; gap: 8px; color: var(--muted); font-size: 0.94rem; }
+    code {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      color: #93c5fd;
+    }
+    pre {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      overflow-x: auto;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+    a { color: #93c5fd; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    footer { text-align: center; padding: 24px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Step-by-Step Print, Assembly &amp; Software Guide</h1>
+      <p class="subtitle">
+        Complete tutorial for the <strong>Collection Base + Pegged Top Lid + Double-Funnel Net &amp; Falcon Cap</strong>
+        configuration, including IRLZ44N MOSFET wiring, MG Chemicals 422B coating, and Arduino IDE setup.
+      </p>
+    </div>
+    <div class="pill-row">
+      <a class="btn secondary" href="index.html">&larr; Back to Overview</a>
+      <a class="btn" href="viewer.html?v=funnel2" target="_blank">Open 3D Viewer</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="grid">
+      <div class="card"><div class="time-badge">~14–16 Hours</div><strong>3D Printing (PETG)</strong><p style="font-size:0.85rem;color:var(--muted);">4 core STLs, support-free on build plate.</p></div>
+      <div class="card"><div class="time-badge">~35 Minutes</div><strong>Mechanical &amp; Fluidics</strong><p style="font-size:0.85rem;color:var(--muted);">Candle, syringes, Falcon bubbler &amp; tubing.</p></div>
+      <div class="card"><div class="time-badge">~45 Min + Cure</div><strong>Wiring &amp; Coating</strong><p style="font-size:0.85rem;color:var(--muted);">IRLZ44N driver, SHT30 I2C &amp; 422B coat.</p></div>
+      <div class="card"><div class="time-badge">~20–30 Minutes</div><strong>Software &amp; Flashing</strong><p style="font-size:0.85rem;color:var(--muted);">Arduino IDE, ESP32 core, SHT31 lib &amp; test.</p></div>
+    </section>
+
+    <section>
+      <h2>0. Complete Parts Checklist <span class="time-badge">~10 min</span></h2>
+      <div class="card" style="overflow-x:auto;">
+        <h3 style="font-size:1rem;">A. 3D-Printed Parts (PETG)</h3>
+        <table>
+          <thead><tr><th>STL Download</th><th>Role</th><th>Vol</th><th>Bed Orientation</th></tr></thead>
+          <tbody>
+            <tr><td><a href="stl/mvp_bottom_base_collection.stl" download>mvp_bottom_base_collection.stl</a></td><td>Bottom Base (10 mL Syringe Holder + 285&deg; Pump Clips + 8.5&deg; Drain)</td><td>215.7 cm&sup3;</td><td>Upright (circular foot on bed)</td></tr>
+            <tr><td><a href="stl/mvp_top_lid_pegs.stl" download>mvp_top_lid_pegs.stl</a></td><td>Top Lid with 3&times; Upward Alignment Pegs (&Oslash;13.8 mm)</td><td>52.1 cm&sup3;</td><td>Flat (pegs up)</td></tr>
+            <tr><td><a href="stl/mvp_syringe_cage_snap_falcon_funnel.stl" download>mvp_syringe_cage_snap_falcon_funnel.stl</a></td><td>Double-Funnel Net + 300&deg; Downward Falcon Cap</td><td>42.0 cm&sup3;</td><td>Upright (base &amp; cap rim flush on bed)</td></tr>
+            <tr><td><a href="stl/mvp_candle_collar.stl" download>mvp_candle_collar.stl</a></td><td>Candle Drop-In Collar (&Oslash;58 mm flange)</td><td>10.0 cm&sup3;</td><td>Flat on bed</td></tr>
+            <tr><td><a href="stl/mvp_fit_test_coupon.stl" download>mvp_fit_test_coupon.stl</a></td><td><em>Optional</em> 15-min fit check (tube, candle, Luer, air port, M3)</td><td>21.2 cm&sup3;</td><td>Flat on bed</td></tr>
+          </tbody>
+        </table>
+
+        <h3 style="font-size:1rem;margin-top:8px;">B. Chamber, Fluidics &amp; Ordered Electronics</h3>
+        <table>
+          <thead><tr><th>Item</th><th>Specification / Role</th><th>Link</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Acrylic Tube &amp; Candle</strong></td><td>85&times;90&times;100 mm clear acrylic tube + 4" ceramic candle + washer + wing nut</td><td>Off-the-shelf</td></tr>
+            <tr><td><strong>Syringes, Falcon &amp; Filter</strong></td><td>50 mL feed syringe, 10 mL collection syringe, 50 mL Falcon tube, 0.22 &mu;m Luer filter</td><td>Lab consumables</td></tr>
+            <tr><td><strong>Tubing &amp; Valve</strong></td><td>1/4" ID silicone drain tube (~0.3 m) + 1/4" mini ball valve + 6 mm OD air tube (~1 m)</td><td>Plumbing</td></tr>
+            <tr><td><strong>ESP32-WROOM-32 DevKit</strong></td><td>30-pin controller (GPIO 21 SDA, GPIO 22 SCL, GPIO 25 Pump)</td><td><a href="https://www.amazon.com/dp/B0718T232Z" target="_blank">B0718T232Z</a></td></tr>
+            <tr><td><strong>SHT30 Waterproof Probe</strong></td><td>IP67 sintered mesh I2C Temp/RH probe (3.3V, address 0x44)</td><td><a href="https://www.amazon.com/dp/B081JR1WQ7" target="_blank">B081JR1WQ7</a></td></tr>
+            <tr><td><strong>5V DC Mini Air Pump</strong></td><td>&Oslash;27&times;55 mm diaphragm pump (4–6 mm barb)</td><td><a href="https://www.amazon.com/dp/B074N2DCHW" target="_blank">B074N2DCHW</a></td></tr>
+            <tr><td><strong>IRLZ44N N-MOSFET</strong></td><td>TO-220 logic-level solid-state pump switch</td><td><a href="https://www.amazon.com/dp/B08M441HDN" target="_blank">B08M441HDN</a></td></tr>
+            <tr><td><strong>1/4W Resistor Kit</strong></td><td>220 &Omega; gate resistor + 10 k&Omega; gate pull-down resistor</td><td><a href="https://www.amazon.com/dp/B07QXP4KVZ" target="_blank">B07QXP4KVZ</a></td></tr>
+            <tr><td><strong>1N4007 Flyback Diode</strong></td><td>1A 1000V DO-41 inductive spike protection across pump</td><td><a href="https://www.amazon.com/dp/B07Q6J9TNW" target="_blank">B07Q6J9TNW</a></td></tr>
+            <tr><td><strong>5V 2A PSU + Terminal</strong></td><td>5.5&times;2.1 mm screw terminal block powering ESP32 VIN &amp; pump</td><td><a href="https://www.amazon.com/dp/B0BVHT4CB4" target="_blank">B0BVHT4CB4</a></td></tr>
+            <tr><td><strong>22 AWG Silicone Wire</strong></td><td>Flexible multi-color hook-up wire</td><td><a href="https://www.amazon.com/dp/B07G72D85H" target="_blank">B07G72D85H</a></td></tr>
+            <tr><td><strong>MG Chemicals 422B</strong></td><td>Brush-on silicone conformal coating (55 mL)</td><td><a href="https://www.amazon.com/dp/B008O9YIV6" target="_blank">B008O9YIV6</a></td></tr>
+            <tr><td><strong>M3 Stainless 304 Kit</strong></td><td>M3 screws, nuts &amp; washers for ESP32 bay mount</td><td><a href="https://www.amazon.com/dp/B0812TYT5L" target="_blank">B0812TYT5L</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>Phase 1: 3D Printing &amp; Prep <span class="time-badge">~14–16 hr print &bull; 20 min prep</span></h2>
+      <div class="card">
+        <ol>
+          <li><strong>Slice in PETG:</strong> <code>0.4 mm</code> nozzle, <code>0.20 mm</code> layer height, <code>4</code> perimeters, <code>25–35%</code> gyroid infill, <strong>no supports</strong>.</li>
+          <li><strong>Optional Calibration (~15 min):</strong> Print <code>mvp_fit_test_coupon.stl</code> first to verify your printer's fit for the <code>90.5 mm</code> acrylic tube, candle stem, Luer filter, <code>6 mm</code> air port, and <code>M3</code> holes.</li>
+          <li><strong>Clean &amp; Dry-Fit:</strong> Clear any stringing from the <code>3&times; &Oslash;14.2 mm</code> wing holes, <code>&Oslash;13.8 mm</code> lid pegs, and the <code>&Oslash;4.5 mm</code> sloped drain bore. Test-thread the <code>50 mL</code> Falcon tube into the <code>300&deg;</code> cap and the candle stem into the bottom of the double-funnel.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>Phase 2: Mechanical &amp; Chamber Assembly <span class="time-badge">~20 min</span></h2>
+      <div class="card">
+        <ol>
+          <li><strong>Mount Ceramic Candle:</strong> Slide the rubber washer onto the <code>1/4"</code> BSP stem, pass it through <code>mvp_candle_collar.stl</code>, and tighten the wing nut. Wrap 2–3 turns of PTFE tape on the upper threads.</li>
+          <li><strong>Assemble Lid &amp; Double-Funnel:</strong> Drop the candle collar into the center pocket of <code>mvp_top_lid_pegs.stl</code>. Align the <code>3&times; &Oslash;14.2 mm</code> wing holes of <code>mvp_syringe_cage_snap_falcon_funnel.stl</code> onto the <code>3&times;</code> upward lid pegs and screw the funnel's bottom <code>1/4"</code> BSP boss onto the candle stem until flush.</li>
+          <li><strong>Install Filter, Feed Syringe &amp; Falcon Bubbler:</strong> Press the <code>0.22 &mu;m</code> Luer-slip filter into the <code>0&deg;</code> lid port. Seat the <code>50 mL</code> nutrient syringe into the top cage + Luer-Lock socket. Fill a <code>50 mL</code> Falcon tube ~1/3 with sterile water and screw it upward into the <code>300&deg;</code> cap.</li>
+          <li><strong>Seat Tube, Lid &amp; Collection Syringe:</strong> Press the <code>85&times;90&times;100 mm</code> acrylic tube into <code>mvp_bottom_base_collection.stl</code>, place the lid assembly on top, and snap the <code>10 mL</code> collection syringe into the <code>75&deg;</code> C-clips.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>Phase 3: Plumbing &amp; Fluidics <span class="time-badge">~10 min</span></h2>
+      <div class="card">
+        <ol>
+          <li><strong>Drain Line (0&deg; &rarr; 75&deg;):</strong> Push <code>1/4"</code> ID silicone tubing the full <code>16 mm</code> depth onto the <code>8.5&deg;</code> sloped drain barb, insert the <code>1/4"</code> inline ball valve mid-line, and route to the <code>10 mL</code> collection syringe. Keep the valve closed during runs and open to sample leachate.</li>
+          <li><strong>Air Humidifier Loop (285&deg; &rarr; 300&deg; &rarr; 240&deg;):</strong> Snap the <code>5V</code> pump into the <code>285&deg;</code> clips. Run <code>6 mm</code> OD air tubing from pump outlet &rarr; <code>300&deg;</code> Falcon cap <strong>Port A</strong> (with dip tube submerged in water), and from <strong>Port B</strong> (headspace) &rarr; <code>240&deg;</code> lid air port.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>Phase 4: Electronics Wiring &amp; Conformal Coating <span class="time-badge">~45 min + cure</span></h2>
+      <div class="card">
+        <pre>5V 2A PSU (+5V) ──┬──────────────────────────► ESP32 VIN (5V)
+                  │
+                  ├──► Pump (+) Red Wire
+                  │         │
+                  │    [1N4007 Diode]  (Silver cathode band toward +5V!)
+                  │         │
+                  └──► Pump (─) Black ──► IRLZ44N DRAIN (Pin 2 / Middle)
+                                               │
+ESP32 GPIO 25 ──[220 Ω]──┬──► IRLZ44N GATE (Pin 1 / Left)
+                         │
+                      [10 kΩ]
+                         │
+5V 2A PSU (GND) ──┬──────┴──► IRLZ44N SOURCE (Pin 3 / Right)
+                  │
+                  └─────────► ESP32 GND
+
+SHT30 Probe:  VCC (Red) → 3.3V | GND (Black) → GND | SDA → GPIO 21 | SCL → GPIO 22</pre>
+        <div class="alert danger">
+          <strong>Critical Polarity &amp; Voltage Checks:</strong>
+          (1) The <code>1N4007</code> silver cathode band MUST face <strong>+5V</strong>.
+          (2) Power the SHT30 probe from ESP32 <strong>3.3V</strong> (not 5V).
+          (3) Never brush conformal coating onto the SHT30 sintered tip, USB port, or <code>BOOT</code>/<code>EN</code> buttons.
+        </div>
+        <ol>
+          <li><strong>Solder MOSFET Driver:</strong> With the IRLZ44N face toward you (legs down), Pin 1 = Gate, Pin 2 = Drain, Pin 3 = Source. Solder <code>10 k&Omega;</code> between Gate &amp; Source, <code>220 &Omega;</code> from GPIO 25 to Gate, and the <code>1N4007</code> diode across Pump <code>+</code>/<code>-</code>. Wire PSU <code>+5V</code>/<code>GND</code> via the screw terminal block to ESP32 <code>VIN</code>/<code>GND</code> and the pump/MOSFET.</li>
+          <li><strong>Route SHT30 Probe:</strong> Hang the SHT30 tip through the <code>120&deg;</code> lid port into the chamber airspace (clear of the wet candle) and wire to <code>3.3V</code>, <code>GND</code>, <code>GPIO 21</code>, <code>GPIO 22</code>.</li>
+          <li><strong>Coat &amp; Mount:</strong> Brush <strong>MG Chemicals 422B</strong> over exposed solder joints and PCB traces (~30 min tack-free, 24 hr full cure). Mount the ESP32 in the <code>180&deg;</code> base bay with <code>M3&times;8 mm</code> stainless screws.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>Phase 5: Software Installation &amp; Flashing <span class="time-badge">~20–30 min</span></h2>
+      <div class="card">
+        <ol>
+          <li><strong>Install Arduino IDE 2.x (~5 min):</strong> Download from <a href="https://www.arduino.cc/en/software" target="_blank">arduino.cc/en/software</a>.</li>
+          <li><strong>Install ESP32 Board Core (~10 min):</strong> Open <strong>Preferences</strong>, add <code>https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_index.json</code> to <em>Additional boards manager URLs</em>, then open <strong>Boards Manager</strong> and install <code>esp32 by Espressif Systems</code>.</li>
+          <li><strong>Install SHT31 Library (~2 min):</strong> Open <strong>Library Manager</strong>, search <code>Adafruit SHT31</code>, and install (including <code>Adafruit BusIO</code>).</li>
+          <li><strong>USB Driver (~3 min, if needed):</strong> Plug ESP32 via a <strong>data</strong> Micro-USB cable. If no port appears under <strong>Tools &rarr; Port</strong>, install the Silicon Labs CP210x (or CH340) VCP driver.</li>
+          <li><strong>Upload Firmware (~5 min):</strong> Open <code>firmware/esp32_humid_controller/esp32_humid_controller.ino</code>, select <strong>Board: DOIT ESP32 DEVKIT V1</strong> and your COM/cu port, then click <strong>Upload</strong> (hold <code>BOOT</code> if it waits on <code>Connecting...</code>).</li>
+          <li><strong>Verify Serial Monitor:</strong> Set baud rate to <code>115200</code>; confirm readings like <code>T=22.40 C | RH=64.2% | Pump=ON</code> every 2 seconds.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section>
+      <h2>Phase 6: Leak Test &amp; Commissioning <span class="time-badge">~15 min</span></h2>
+      <div class="card">
+        <ol>
+          <li><strong>Hysteresis Test:</strong> Power via the <code>5V 2A</code> PSU. Confirm the pump runs below <code>85% RH</code> and shuts off above <code>90% RH</code> (or after the <code>120 s</code> safety cap).</li>
+          <li><strong>Bubbler &amp; Drain Check:</strong> Verify steady bubbling in the <code>50 mL</code> Falcon tube with no air leaks, close the <code>1/4"</code> drain valve, and load sterile water/nutrient into the top <code>50 mL</code> syringe to confirm slow ceramic candle weeping.</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    CoSE Mycoponic Chamber MVP &bull; Parametric CAD (build123d) + ESP32/IRLZ44N Firmware
+  </footer>
+</body>
+</html>
