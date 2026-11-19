@@ -289,16 +289,6 @@ def _bottom_base_core(m3_angles):
     )
     base = base - funnel_cut - sump_well
 
-    # Carve a curved Ø16 mm clearance notch into the base foot flange around 0 deg
-    # so silicone tubing can push onto the full 16 mm barb depth up to r_body
-    flange_notch_cyl = Pos(r_body + 8.0, 0, -0.5) * Cylinder(
-        8.0, 22.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-    flange_notch_slot = Pos(r_body + 8.0, 0, -0.5) * Box(
-        (r_flange - r_body) + 4.0, 16.0, 22.0, align=(Align.MIN, Align.CENTER, Align.MIN)
-    )
-    base = base - flange_notch_cyl - flange_notch_slot
-
     # Add downward-sloped (8.5 deg) side-exit 1/4" hose barb along +X
     x_start = r_body - 4.0
     shaft_len = p.DRAIN_BARB_LEN + 4.0
