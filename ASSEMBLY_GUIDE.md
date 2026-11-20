@@ -59,7 +59,7 @@ This tutorial covers the complete build for the **Double-Funnel + Pegged Lid + C
    - **Material:** PETG (water-resistant, chemically inert, slight flex for snap-in C-clips)
    - **Nozzle / Layer Height:** `0.4 mm` nozzle, `0.20 mm` layer height
    - **Walls & Infill:** `4` perimeters (`1.6 mm` wall), `5` top/bottom layers, `25–35%` gyroid infill
-   - **Supports:** **None required** (all parts use `<= 45°` chamfers/gussets). *Tip: you may enable a `5 mm` brim on `mvp_syringe_cage_snap_falcon_funnel.stl` if bed adhesion is light, and optionally print `mvp_top_lid_pegs.stl` upright with touching-buildplate support only if your printer struggles with the `Ø90.5 mm` ceiling bridge.*
+   - **Supports:** **None required** on the lid, funnel, or collar (all use `<= 45°` chamfers/gussets). *Tip: enable **"Touching Buildplate" support under the `8.5°` sloped drain barb only** on `mvp_bottom_base_collection.stl` for a crisp underside seal, and optionally a `5 mm` brim on `mvp_syringe_cage_snap_falcon_funnel.stl`.*
 2. **Optional Fit Check (~15 min):** Print `mvp_fit_test_coupon.stl` first to verify your printer's tolerances against the acrylic tube (`90.5 mm` socket), candle stem, Luer filter, `6 mm` air tube, and `M3` self-tapping holes.
 3. **Post-Processing:**
    - Remove any brim or stringing from the `3×` `Ø14.2 mm` wing holes on `mvp_syringe_cage_snap_falcon_funnel.stl`, the `Ø13.8 mm` pegs on `mvp_top_lid_pegs.stl`, and the `Ø4.5 mm` sloped drain bore on `mvp_bottom_base_collection.stl`.

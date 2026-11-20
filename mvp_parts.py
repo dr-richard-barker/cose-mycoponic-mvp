@@ -148,12 +148,18 @@ def mvp_top_lid_pegs():
     for deg in (60.0, 180.0, 300.0):
         sx = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
         sy = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
-        peg = Pos(sx, sy, peg_z0) * Cylinder(
+        peg_cyl = Pos(sx, sy, peg_z0) * Cylinder(
             peg_r,
-            peg_h,
+            peg_h - 1.0,
             align=(Align.CENTER, Align.CENTER, Align.MIN),
         )
-        lid = lid + peg
+        peg_tip = Pos(sx, sy, peg_z0 + peg_h - 1.0) * Cone(
+            peg_r,
+            peg_r - 1.0,
+            1.0,
+            align=(Align.CENTER, Align.CENTER, Align.MIN),
+        )
+        lid = lid + peg_cyl + peg_tip
     return lid
 
 
@@ -367,6 +373,14 @@ def _bottom_base_core(m3_angles):
                         align=(Align.CENTER, Align.CENTER, Align.MIN),
                     )
                     base = base - m3_hole
+            if deg == 180.0:
+                for zy in (-15.0, 15.0):
+                    tie_slot = (
+                        Rot(0, 0, deg)
+                        * Pos(36.0, zy, -0.5)
+                        * Box(2.5, 4.5, p.BAY_FLOOR_Z + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+                    )
+                    base = base - tie_slot
 
     return base
 
@@ -825,9 +839,11 @@ def mvp_syringe_cage_snap_falcon_funnel():
     z_cage_start = z0 + 24.25
     cage_h = p.CAGE_HEIGHT * 2.0
     z_top_ring = z_cage_start + cage_h - p.CAGE_RING_HEIGHT
+    z_mid_ring = z_cage_start + (cage_h / 2.0) - (p.CAGE_RING_HEIGHT / 2.0)
     top_ring = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_top_ring)
+    mid_ring = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_mid_ring)
     rib_h = (z_top_ring - z_cage_start) + 2.5
-    cage = top_ring
+    cage = top_ring + mid_ring
     for ang in wing_angles:
         rib = Rot(0, 0, ang) * Pos(r_mid, 0, z_cage_start - 1.2) * Box(
             p.CAGE_WALL, 6.0, rib_h, align=(Align.CENTER, Align.CENTER, Align.MIN)
@@ -1152,7 +1168,7 @@ def mvp_candle_ref():
 
 def mvp_syringe_50ml_ref():
     """Reference solid for a 50 mL nutrient-feed medical syringe above the lid."""
-    z_tip = p.Z_LID_TOP + 28.0
+    z_tip = p.Z_LID_TOP + 42.1
     tip = Pos(0, 0, z_tip) * Cylinder(2.1, 10.5, align=(Align.CENTER, Align.CENTER, Align.MIN))
     barrel = Pos(0, 0, z_tip + 10.0) * Cylinder(15.0, 125.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
     flange = Pos(0, 0, z_tip + 135.0) * Cylinder(23.0, 3.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
