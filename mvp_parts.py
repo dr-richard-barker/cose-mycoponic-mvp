@@ -137,14 +137,14 @@ def mvp_top_lid():
 
 
 def mvp_top_lid_pegs():
-    """Standard slide-on top lid with 3x upward alignment pegs (Ø13.8 mm x 3.8 mm
+    """Standard slide-on top lid with 3x upward alignment pegs (Ø13.8 mm x 11.4 mm
     above Z_LID_TOP) at 60/180/300 deg that mate into the Ø14.2 mm wing holes of
     mvp_syringe_cage_snap_falcon_funnel.
     """
     lid = mvp_top_lid()
     peg_r = (p.SYRINGE_PILLAR_DIA - 0.2) / 2.0  # 6.9 mm (Ø13.8 mm)
     peg_z0 = p.Z_LID_TOP - 5.0  # anchor 0.5 mm into the 4.5 mm socket floor
-    peg_h = 5.0 + 3.8  # protrudes 3.8 mm above Z_LID_TOP into 4.0 mm wing
+    peg_h = 5.0 + (3.8 * 3.0)  # protrudes 11.4 mm (3x) above Z_LID_TOP through 4.0 mm wing
     for deg in (60.0, 180.0, 300.0):
         sx = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
         sy = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
@@ -821,9 +821,10 @@ def mvp_syringe_cage_snap_falcon_funnel():
         + luer_ears
     ) - luer_taper
 
-    # 4. 3-strut syringe cage rising directly off the Ø39.5 mm funnel belly
+    # 4. 3-strut syringe cage rising directly off the Ø39.5 mm funnel belly (2x height = 110 mm)
     z_cage_start = z0 + 24.25
-    z_top_ring = z_cage_start + p.CAGE_HEIGHT - p.CAGE_RING_HEIGHT
+    cage_h = p.CAGE_HEIGHT * 2.0
+    z_top_ring = z_cage_start + cage_h - p.CAGE_RING_HEIGHT
     top_ring = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_top_ring)
     rib_h = (z_top_ring - z_cage_start) + 2.5
     cage = top_ring
