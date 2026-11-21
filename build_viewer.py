@@ -31,6 +31,8 @@ PARTS_META = [
     ("mvp_syringe_cage_snap_25ml", "Snap-On 25 mL Net (1-Piece)", "#ea580c", 1.0, 3.5),
     ("mvp_syringe_cage_snap_falcon", "Snap-On 50 mL Net + Falcon Holder", "#fb923c", 1.0, 3.5),
     ("mvp_syringe_cage_snap_falcon_funnel", "Double-Funnel Net + Falcon Cap", "#f43f5e", 1.0, 3.5),
+    ("mvp_luer_stopcock_body", "3-Way Luer Stopcock Body (Bleed Valve)", "#ec4899", 1.0, 3.8),
+    ("mvp_luer_stopcock_plug", "3-Way Luer Stopcock T-Bore Plug", "#fbbf24", 1.0, 3.8),
     ("mvp_candle_ref", "4-in Ceramic Filter Candle", "#e2e8f0", 1.0, 3.0),
     ("mvp_syringe_50ml_ref", "50 mL Nutrient Feed Syringe", "#bae6fd", 0.42, 4.0),
     ("mvp_syringe_10ml_ref", "10 mL Collection Syringe", "#bae6fd", 0.42, 0.0),
@@ -313,6 +315,8 @@ def main():
         "mvp_syringe_cage_snap",
         "mvp_syringe_cage_snap_25ml",
         "mvp_syringe_cage_snap_falcon",
+        "mvp_luer_stopcock_body",
+        "mvp_luer_stopcock_plug",
       ];
       if (hiddenByDefault.includes(name)) mesh.visible = false;
 
@@ -377,7 +381,7 @@ def main():
     const common = ["mvp_bottom_base_collection", "mvp_tube_ref", "mvp_candle_ref", "mvp_candle_collar", "mvp_syringe_50ml_ref", "mvp_syringe_10ml_ref"];
     const sysParts = ["mvp_top_lid", "mvp_syringe_cage_snap_falcon", "mvp_falcon_50ml_ref", ...sysLayerNames];
     document.getElementById("preset-fullsys").onclick = () => {{ sysVisible = true; syncSysBtn(); applyPreset("preset-fullsys", [...common, ...sysParts]); }};
-    document.getElementById("preset-funnel").onclick = () => {{ sysVisible = true; syncSysBtn(); applyPreset("preset-funnel", [...common, "mvp_top_lid_pegs", "mvp_syringe_cage_snap_falcon_funnel", "mvp_falcon_50ml_ref", ...sysLayerNames]); }};
+    document.getElementById("preset-funnel").onclick = () => {{ sysVisible = true; syncSysBtn(); applyPreset("preset-funnel", [...common, "mvp_top_lid_pegs", "mvp_syringe_cage_snap_falcon_funnel", "mvp_luer_stopcock_body", "mvp_luer_stopcock_plug", "mvp_falcon_50ml_ref", ...sysLayerNames]); }};
     document.getElementById("preset-snap50").onclick = () => {{ sysVisible = false; syncSysBtn(); applyPreset("preset-snap50", [...common, "mvp_top_lid", "mvp_syringe_cage_snap"]); }};
     document.getElementById("preset-tower").onclick = () => {{ sysVisible = false; syncSysBtn(); applyPreset("preset-tower", [...common, "mvp_top_lid_syringe_tower"]); }};
 

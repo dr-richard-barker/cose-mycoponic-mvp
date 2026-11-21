@@ -863,6 +863,122 @@ def mvp_snap_pin():
     )
 
 
+def mvp_luer_stopcock_body():
+    """3-Way Luer Stopcock body that plugs into the top Female Luer-Lock of
+    mvp_syringe_cage_snap_falcon_funnel, accepts the 50 mL syringe on top, and
+    provides a 0 deg (+X) Female Luer gas-bleed port through the open cage window.
+    """
+    z_seat = p.Z_LID_TOP + 42.0
+    z_valve = p.Z_LID_TOP + 52.0
+
+    # Bottom 6% Male Luer nose (Ø4.28 -> Ø3.88 mm, 0.01 mm radial clearance in funnel socket)
+    male_nose = Pos(0, 0, z_seat - 7.4) * Cone(
+        3.88 / 2.0, 4.28 / 2.0, 7.4, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    shoulder = Pos(0, 0, z_seat) * Cylinder(
+        6.0, 4.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+
+    # Central horizontal valve barrel along Y (Y = -7.0..+7.0, Ø15.0 mm)
+    barrel = (
+        Pos(0, -7.0, z_valve)
+        * Rot(-90, 0, 0)
+        * Cylinder(7.5, 14.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    )
+
+    # Top Female Luer-Lock boss (Z = z_valve + 5.5 .. z_valve + 14.0)
+    top_boss = Pos(0, 0, z_valve + 5.5) * Cylinder(
+        3.35, 8.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    top_ears = Pos(0, 0, z_valve + 12.8) * Box(
+        7.8, 2.6, 1.2, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+
+    # Side 0 deg (+X) Female Luer-Lock bleed port (X = 5.5..18.0 mm)
+    side_boss = (
+        Pos(5.5, 0, z_valve)
+        * Rot(0, 90, 0)
+        * Cylinder(3.35, 12.5, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    )
+    side_ears = Pos(17.4, 0, z_valve) * Box(
+        1.2, 2.6, 7.8, align=(Align.CENTER, Align.CENTER, Align.CENTER)
+    )
+
+    body = male_nose + shoulder + barrel + top_boss + top_ears + side_boss + side_ears
+
+    # Cut 1:12 tapered valve seat along Y (Ø10.5 mm at +Y=7 -> Ø9.5 mm at -Y=-7)
+    seat_cut = (
+        Pos(0, -7.2, z_valve)
+        * Rot(-90, 0, 0)
+        * Cone(4.74, 5.26, 14.4, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    )
+    # Top Female Luer taper + central Ø2.5 mm bore
+    top_taper = Pos(0, 0, z_valve + 6.3) * Cone(
+        3.90 / 2.0, 4.30 / 2.0, 7.9, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    top_bore = Pos(0, 0, z_valve) * Cylinder(
+        1.25, 8.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    # Bottom Ø2.0 mm through-bore
+    bot_bore = Pos(0, 0, z_seat - 7.6) * Cylinder(
+        1.0, 18.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    # Side Female Luer taper + Ø2.5 mm bleed bore
+    side_taper = (
+        Pos(10.3, 0, z_valve)
+        * Rot(0, 90, 0)
+        * Cone(3.90 / 2.0, 4.30 / 2.0, 7.9, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    )
+    side_bore = (
+        Pos(0, 0, z_valve)
+        * Rot(0, 90, 0)
+        * Cylinder(1.25, 11.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    )
+
+    return body - seat_cut - top_taper - top_bore - bot_bore - side_taper - side_bore
+
+
+def mvp_luer_stopcock_plug():
+    """Rotatable T-bore tapered plug for mvp_luer_stopcock_body (0.15 mm radial
+    print clearance). Handle pointing UP (+Z) connects Syringe <-> Funnel;
+    rotating toward +X bleeds Syringe or Funnel to the 0 deg side port.
+    """
+    z_valve = p.Z_LID_TOP + 52.0
+
+    # Tapered plug core (Ø9.16 mm at -Y=-7.2 -> Ø10.2 mm at +Y=7.0)
+    plug = (
+        Pos(0, -7.2, z_valve)
+        * Rot(-90, 0, 0)
+        * Cone(4.58, 5.10, 14.2, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    )
+    # Retaining collar lip on -Y end + ergonomic T-handle on +Y end
+    ret_lip = (
+        Pos(0, -8.5, z_valve)
+        * Rot(-90, 0, 0)
+        * Cylinder(5.1, 1.45, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    )
+    stem = (
+        Pos(0, 7.0, z_valve)
+        * Rot(-90, 0, 0)
+        * Cylinder(3.5, 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    )
+    handle = Pos(0, 12.5, z_valve + 3.0) * Box(
+        4.0, 3.0, 14.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
+    )
+    plug = plug + ret_lip + stem + handle
+
+    # Cut internal Ø2.5 mm T-bore: vertical through-bore (+Z/-Z) + one side leg (-X)
+    t_vert = Pos(0, 0, z_valve - 6.0) * Cylinder(
+        1.25, 12.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    t_side = (
+        Pos(-6.0, 0, z_valve)
+        * Rot(0, 90, 0)
+        * Cylinder(1.25, 6.5, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    )
+    return plug - t_vert - t_side
+
+
 def mvp_top_lid_falcon():
     """Lid variant with a side-mounted Ø30.8 mm loop at 120 deg (next to the
     humid air inlet port) so a 50 mL Falcon tube humidifier slides in from above.
