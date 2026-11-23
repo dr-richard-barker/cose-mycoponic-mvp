@@ -19,6 +19,7 @@ from build123d import (
     Circle,
     Cone,
     Cylinder,
+    Ellipse,
     Helix,
     Locations,
     Plane,
@@ -277,8 +278,14 @@ def _bottom_base_core(m3_angles):
     r_tube_in = p.TUBE_ID / 2.0
     r_drain = p.DRAIN_BORE_DIA / 2.0
 
-    # Main cylindrical body + stability foot
-    foot = Cylinder(r_flange, p.BASE_FOOT_HEIGHT, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    # Main cylindrical body + offset oval stability foot (so 285 deg pump clips sit on foot)
+    with BuildSketch() as foot_sk:
+        Ellipse(p.BASE_FOOT_OVAL_RX, p.BASE_FOOT_OVAL_RY)
+    foot = (
+        Rot(0, 0, p.PUMP_CLIP_ANGLE_DEG)
+        * Pos(p.BASE_FOOT_OVAL_OFFSET, 0, 0)
+        * extrude(foot_sk.sketch, amount=p.BASE_FOOT_HEIGHT)
+    )
     body = Cylinder(r_body, p.Z_BASE_TOP, align=(Align.CENTER, Align.CENTER, Align.MIN))
     base = foot + body
 
@@ -1294,7 +1301,7 @@ def mvp_cables_ref():
         1.3,
     )
     relay_to_pump = _pipe(
-        [(10.0, -32.0, 9.0), (14.0, -42.0, 10.0), (14.0, -52.0, 14.0)],
+        [(10.0, -32.0, 9.0), (14.2, -42.0, 12.0), (14.5, -54.0, 17.0)],
         1.4,
     )
     return psu_to_esp + esp_to_relay + relay_to_pump

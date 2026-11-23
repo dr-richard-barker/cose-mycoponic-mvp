@@ -59,7 +59,10 @@ Z_LID_SKIRT_BOTTOM = Z_TUBE_TOP - SKIRT_ENGAGEMENT  # 139.6 mm
 # 5. Bottom Base & Side-Exit Drain Valve Port
 # ==============================================================================
 BASE_BODY_OD = TUBE_OD + 2.0 * SLIDE_CLEARANCE_RADIAL + 2.0 * WALL_THICKNESS  # 98.0 mm
-BASE_FLANGE_OD = 114.0             # Wide foot flange for benchtop stability
+BASE_FLANGE_OD = 114.0             # Nominal base width reference
+BASE_FOOT_OVAL_RX = 65.5           # Semi-major radius along 285 deg pump axis (131 mm length)
+BASE_FOOT_OVAL_RY = 59.0           # Semi-minor radius perpendicular to pump axis (118 mm width)
+BASE_FOOT_OVAL_OFFSET = 8.5        # Center offset toward 285 deg (rear 57 mm / front 74 mm)
 BASE_SOCKET_ID = TUBE_OD + 2.0 * SLIDE_CLEARANCE_RADIAL  # 90.5 mm
 
 DRAIN_BORE_DIA = 4.5               # Internal drain channel diameter
@@ -137,8 +140,8 @@ FALCON_CAP_PORT_SPACING = 13.0     # Center-to-center spacing of 2x Ø6.0 mm bor
 
 # Front Air-Pump Snap-In Cradle (285 deg, directly below 300 deg Falcon humidifier)
 PUMP_CLIP_ANGLE_DEG = 285.0        # Front-right bay, right below Falcon bubbler
-PUMP_CLIP_R = 54.0                 # Flush on front edge of base
-PUMP_CLIP_Z = 16.0                 # Pump centerline height off bench
+PUMP_CLIP_R = 56.0                 # Centered cleanly on the 285 deg oval front extension
+PUMP_CLIP_Z = 18.5                 # Pump centerline height (bottom Z = 5.0 mm, 1 mm above foot)
 PUMP_BARREL_ID = 27.4              # Snap-fit for standard Ø27 mm 5V diaphragm pump
 PUMP_CLIP_SPACING = 32.0           # Center-to-center spacing of the 2 clips
 
