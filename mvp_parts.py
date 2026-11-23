@@ -282,62 +282,103 @@ def _bottom_base_core(m3_angles):
     body = Cylinder(r_body, p.Z_BASE_TOP, align=(Align.CENTER, Align.CENTER, Align.MIN))
     base = foot + body
 
-    # Cut tube socket (from Z_TUBE_SEAT to Z_BASE_TOP)
-    socket_cut = Pos(0, 0, p.Z_TUBE_SEAT) * Cylinder(
-        r_socket, p.SKIRT_ENGAGEMENT + 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
+    # Cut tube socket annulus (R = GUTTER_R_OUT..r_socket, from Z_TUBE_SEAT to Z_BASE_TOP)
+    # Preserves inner weir ring while seating the Ø85/90 mm clear acrylic cylinder
+    socket_cut = _tube(p.GUTTER_R_OUT, r_socket, p.SKIRT_ENGAGEMENT + 1.0, p.Z_TUBE_SEAT)
     # Lead-in chamfer at top mouth of base socket
     socket_chamfer = _frustum(r_socket, r_socket + 1.2, 1.5, p.Z_BASE_TOP - 1.5)
     base = base - socket_cut - socket_chamfer
 
-    # Cut conical nutrient funnel (from FUNNEL_APEX_Z to Z_TUBE_SEAT)
-    funnel_cut = _frustum(r_drain, r_tube_in, p.Z_TUBE_SEAT - p.FUNNEL_APEX_Z, p.FUNNEL_APEX_Z)
-    # Small cylindrical sump well at apex to meet horizontal drain cleanly
+    # Cut annular condensation collection gutter (R = WEIR_R_OUT..GUTTER_R_OUT, Z >= GUTTER_FLOOR_Z)
+    # directly beneath the inner wall of the clear cylinder, separated from funnel by weir
+    gutter_cut = _tube(
+        p.WEIR_R_OUT,
+        p.GUTTER_R_OUT,
+        p.Z_BASE_TOP + 1.0 - p.GUTTER_FLOOR_Z,
+        p.GUTTER_FLOOR_Z,
+    )
+    # Trim the circular divider weir ring (R = WEIR_R_IN..WEIR_R_OUT) above WEIR_TOP_Z
+    weir_trim = _tube(
+        p.WEIR_R_IN - 0.1,
+        p.WEIR_R_OUT + 0.1,
+        p.Z_BASE_TOP + 1.0 - p.WEIR_TOP_Z,
+        p.WEIR_TOP_Z,
+    )
+    base = base - gutter_cut - weir_trim
+
+    # Cut conical nutrient funnel up to WEIR_R_IN, plus cylindrical opening above it
+    z_weir_in = p.FUNNEL_APEX_Z + (p.Z_TUBE_SEAT - p.FUNNEL_APEX_Z) * (
+        (p.WEIR_R_IN - r_drain) / (r_tube_in - r_drain)
+    )
+    funnel_cut = _frustum(r_drain, p.WEIR_R_IN, z_weir_in - p.FUNNEL_APEX_Z, p.FUNNEL_APEX_Z)
+    funnel_upper = Pos(0, 0, z_weir_in) * Cylinder(
+        p.WEIR_R_IN, p.Z_BASE_TOP + 1.0 - z_weir_in, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    # Small cylindrical sump well at apex to meet sloped drain cleanly
     sump_well = Pos(0, 0, p.FUNNEL_APEX_Z - 0.5) * Cylinder(
         r_drain, 1.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
     )
-    base = base - funnel_cut - sump_well
+    base = base - funnel_cut - funnel_upper - sump_well
 
-    # Add downward-sloped (8.5 deg) side-exit 1/4" hose barb along +X
-    x_start = r_body - 4.0
-    shaft_len = p.DRAIN_BARB_LEN + 4.0
-    drain_xform = Pos(0, 0, p.DRAIN_CENTER_Z) * Rot(0, p.DRAIN_SLOPE_DEG, 0)
-    barb_shaft = (
-        Pos(x_start, 0, 0)
-        * Rot(0, 90, 0)
-        * Cylinder(p.DRAIN_BARB_SHAFT_OD / 2.0, shaft_len, align=(Align.CENTER, Align.CENTER, Align.MIN))
-    )
-    # Two retention barb cones along the shaft
-    barb_tip = (
-        Pos(r_body + p.DRAIN_BARB_LEN - 5.0, 0, 0)
-        * Rot(0, 90, 0)
-        * Cone(
-            p.DRAIN_BARB_RIB_OD / 2.0,
-            p.DRAIN_BARB_SHAFT_OD / 2.0 - 0.4,
-            5.0,
-            align=(Align.CENTER, Align.CENTER, Align.MIN),
+    def _add_sloped_barb_and_bore(
+        solid,
+        angle_deg: float,
+        r_pivot: float,
+        z_pivot: float,
+        bore_x_start: float,
+    ):
+        """Attach an 8.5 deg downward-sloped 1/4" hose barb and through-bore."""
+        xform = Rot(0, 0, angle_deg) * Pos(r_pivot, 0, z_pivot) * Rot(0, p.DRAIN_SLOPE_DEG, 0)
+        x_barb_start = (r_body - 4.0) - r_pivot
+        x_barb_end = (r_body + p.DRAIN_BARB_LEN) - r_pivot
+        barb_shaft = (
+            Pos(x_barb_start, 0, 0)
+            * Rot(0, 90, 0)
+            * Cylinder(p.DRAIN_BARB_SHAFT_OD / 2.0, p.DRAIN_BARB_LEN + 4.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
         )
-    )
-    barb_mid = (
-        Pos(r_body + p.DRAIN_BARB_LEN - 11.0, 0, 0)
-        * Rot(0, 90, 0)
-        * Cone(
-            p.DRAIN_BARB_RIB_OD / 2.0,
-            p.DRAIN_BARB_SHAFT_OD / 2.0,
-            4.5,
-            align=(Align.CENTER, Align.CENTER, Align.MIN),
+        barb_tip = (
+            Pos(x_barb_end - 5.0, 0, 0)
+            * Rot(0, 90, 0)
+            * Cone(
+                p.DRAIN_BARB_RIB_OD / 2.0,
+                p.DRAIN_BARB_SHAFT_OD / 2.0 - 0.4,
+                5.0,
+                align=(Align.CENTER, Align.CENTER, Align.MIN),
+            )
         )
-    )
+        barb_mid = (
+            Pos(x_barb_end - 11.0, 0, 0)
+            * Rot(0, 90, 0)
+            * Cone(
+                p.DRAIN_BARB_RIB_OD / 2.0,
+                p.DRAIN_BARB_SHAFT_OD / 2.0,
+                4.5,
+                align=(Align.CENTER, Align.CENTER, Align.MIN),
+            )
+        )
+        bore = (
+            Pos(bore_x_start, 0, 0)
+            * Rot(0, 90, 0)
+            * Cylinder(r_drain, x_barb_end - bore_x_start + 2.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        )
+        return (solid + (xform * (barb_shaft + barb_tip + barb_mid))) - (xform * bore)
 
-    base = base + (drain_xform * (barb_shaft + barb_tip + barb_mid))
-
-    # Cut downward-sloped drain bore from X = 0 all the way out through the barb
-    drain_bore = drain_xform * (
-        Pos(-1.0, 0, 0)
-        * Rot(0, 90, 0)
-        * Cylinder(r_drain, r_body + p.DRAIN_BARB_LEN + 2.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+    # 1. Primary center-funnel nutrient leachate drain spout at 0 deg
+    base = _add_sloped_barb_and_bore(
+        base,
+        angle_deg=0.0,
+        r_pivot=0.0,
+        z_pivot=p.DRAIN_CENTER_Z,
+        bore_x_start=-1.0,
     )
-    base = base - drain_bore
+    # 2. Secondary annular condensation-gutter drain spout at 135 deg (through solid pillar)
+    base = _add_sloped_barb_and_bore(
+        base,
+        angle_deg=p.COND_DRAIN_ANGLE_DEG,
+        r_pivot=40.25,
+        z_pivot=p.COND_DRAIN_CENTER_Z,
+        bore_x_start=-0.6,
+    )
 
     # Carve 3 smooth arched electronics/humidifier bays down to Z = 4.0 mm
     # clipped by the conical funnel safety envelope (>= 6 mm perpendicular wall)
@@ -447,7 +488,7 @@ def mvp_bottom_base():
 
 
 def mvp_bottom_base_collection():
-    """Base variant with integrated 10 mL collection syringe cradle (75 deg)
+    """Base variant with dual parallel 10 mL collection syringe cradles (75 deg)
     and front Ø27.4 mm air-pump snap-in clips (285 deg).
     """
     base = _bottom_base_core((180.0, 285.0))
@@ -461,6 +502,24 @@ def mvp_bottom_base_collection():
         width=p.COLL_CLIP_WIDTH,
         snap_tilt_deg=45.0,
     )
+    cond_syringe_clips = _c_clip_cradle(
+        p.COLL_CRADLE_ANGLE_DEG,
+        p.COND_CRADLE_R,
+        p.COLL_CRADLE_Z,
+        p.COLL_SYRINGE_BARREL_ID,
+        p.COLL_CLIP_SPACING,
+        wall=p.COLL_CLIP_WALL,
+        width=p.COLL_CLIP_WIDTH,
+        snap_tilt_deg=45.0,
+    )
+    cond_bars = None
+    for dy in (-p.COLL_CLIP_SPACING / 2.0, p.COLL_CLIP_SPACING / 2.0):
+        bar = (
+            Rot(0, 0, p.COLL_CRADLE_ANGLE_DEG)
+            * Pos(52.0, dy, 0.0)
+            * Box(21.0, p.COLL_CLIP_WIDTH, p.BASE_FOOT_HEIGHT, align=(Align.MIN, Align.CENTER, Align.MIN))
+        )
+        cond_bars = bar if cond_bars is None else (cond_bars + bar)
     pump_clips = _c_clip_cradle(
         p.PUMP_CLIP_ANGLE_DEG,
         p.PUMP_CLIP_R,
@@ -469,7 +528,7 @@ def mvp_bottom_base_collection():
         p.PUMP_CLIP_SPACING,
         snap_tilt_deg=0.0,
     )
-    return base + syringe_clips + pump_clips
+    return base + syringe_clips + cond_syringe_clips + cond_bars + pump_clips
 
 
 def mvp_port_barb_insert():
@@ -1210,16 +1269,14 @@ def mvp_cables_ref():
 
 
 def mvp_plumbing_ref():
-    """Reference solids for bottom drain tube + inline valve (0 deg barb to
-    75 deg 10 mL syringe) and air-pump -> Falcon -> 240 deg lid tubing.
+    """Reference solids for leachate drain tube + valve (0 deg barb to inner
+    75 deg 10 mL syringe), condensation drain tube (135 deg barb to outer
+    75 deg 10 mL syringe), and air-pump -> Falcon -> 240 deg lid tubing.
     """
-    # Bottom drain tube + inline mini ball valve
-    syr_x = p.COLL_CRADLE_R * math.cos(math.radians(p.COLL_CRADLE_ANGLE_DEG)) - (
-        -48.0 * math.sin(math.radians(p.COLL_CRADLE_ANGLE_DEG))
-    )
-    syr_y = p.COLL_CRADLE_R * math.sin(math.radians(p.COLL_CRADLE_ANGLE_DEG)) + (
-        -48.0 * math.cos(math.radians(p.COLL_CRADLE_ANGLE_DEG))
-    )
+    rad75 = math.radians(p.COLL_CRADLE_ANGLE_DEG)
+    # 1. Primary bottom leachate drain tube + inline mini ball valve
+    syr_x = p.COLL_CRADLE_R * math.cos(rad75) - (-48.0 * math.sin(rad75))
+    syr_y = p.COLL_CRADLE_R * math.sin(rad75) + (-48.0 * math.cos(rad75))
     drain_tube = _pipe(
         [(64.0, 0.0, 8.2), (76.0, 10.0, 9.5), (74.0, 26.0, 12.0), (syr_x, syr_y, p.COLL_CRADLE_Z)],
         3.2,
@@ -1229,6 +1286,24 @@ def mvp_plumbing_ref():
     )
     valve_handle = Pos(75.0, 18.0, 17.8) * Rot(0, 0, 20) * Box(
         18.0, 4.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
+    )
+
+    # 2. Secondary condensation gutter gravity drain tube (135 deg barb -> outer 75 deg syringe)
+    rad135 = math.radians(p.COND_DRAIN_ANGLE_DEG)
+    barb_r = 64.0
+    bx = barb_r * math.cos(rad135)
+    by = barb_r * math.sin(rad135)
+    bz = p.COND_DRAIN_CENTER_Z - (barb_r - 40.25) * math.tan(math.radians(p.DRAIN_SLOPE_DEG))
+    cond_syr_x = p.COND_CRADLE_R * math.cos(rad75) - (48.0 * math.sin(rad75))
+    cond_syr_y = p.COND_CRADLE_R * math.sin(rad75) + (48.0 * math.cos(rad75))
+    cond_drain_tube = _pipe(
+        [
+            (bx, by, bz),
+            (-51.0, 53.0, 39.0),
+            (-44.0, 72.0, 24.0),
+            (cond_syr_x, cond_syr_y, p.COLL_CRADLE_Z),
+        ],
+        3.2,
     )
 
     # Air pump -> Falcon cap Port A + internal dip tube (passes cleanly through hole)
@@ -1268,7 +1343,7 @@ def mvp_plumbing_ref():
         ],
         2.6,
     )
-    return drain_tube + valve_body + valve_handle + pump_to_falcon + falcon_to_lid
+    return drain_tube + cond_drain_tube + valve_body + valve_handle + pump_to_falcon + falcon_to_lid
 
 
 def mvp_fit_test_coupon():
@@ -1339,21 +1414,26 @@ def mvp_syringe_50ml_ref():
 
 
 def mvp_syringe_10ml_ref():
-    """Reference solid for a 10 mL collection syringe snapped into the base C-clips."""
-    # Built along +Y in local frame, tip at -Y (pointing toward 0 deg drain barb)
-    tip = Pos(p.COLL_CRADLE_R, -48.0, p.COLL_CRADLE_Z) * Rot(-90, 0, 0) * Cylinder(
-        2.1, 9.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-    barrel = Pos(p.COLL_CRADLE_R, -39.0, p.COLL_CRADLE_Z) * Rot(-90, 0, 0) * Cylinder(
-        8.0, 82.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-    flange = Pos(p.COLL_CRADLE_R, 43.0, p.COLL_CRADLE_Z) * Rot(-90, 0, 0) * Cylinder(
-        15.0, 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-    plunger = Pos(p.COLL_CRADLE_R, 45.0, p.COLL_CRADLE_Z) * Rot(-90, 0, 0) * Cylinder(
-        4.0, 22.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-    thumb = Pos(p.COLL_CRADLE_R, 66.5, p.COLL_CRADLE_Z) * Rot(-90, 0, 0) * Cylinder(
-        9.0, 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
-    )
-    return Rot(0, 0, p.COLL_CRADLE_ANGLE_DEG) * (tip + barrel + flange + plunger + thumb)
+    """Reference solids for dual 10 mL collection syringes snapped into the base C-clips."""
+
+    def _syringe_at(cradle_r: float, y_sign: float):
+        rot_x = -90.0 if y_sign > 0.0 else 90.0
+        tip = Pos(cradle_r, -48.0 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
+            2.1, 9.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        barrel = Pos(cradle_r, -39.0 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
+            8.0, 82.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        flange = Pos(cradle_r, 43.0 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
+            15.0, 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        plunger = Pos(cradle_r, 45.0 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
+            4.0, 22.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        thumb = Pos(cradle_r, 66.5 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
+            9.0, 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        )
+        return Rot(0, 0, p.COLL_CRADLE_ANGLE_DEG) * (tip + barrel + flange + plunger + thumb)
+
+    # Inner leachate syringe: tip toward -Y (0 deg barb); outer condensation syringe: tip toward +Y (135 deg barb)
+    return _syringe_at(p.COLL_CRADLE_R, 1.0) + _syringe_at(p.COND_CRADLE_R, -1.0)

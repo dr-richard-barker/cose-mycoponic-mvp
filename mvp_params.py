@@ -69,6 +69,15 @@ DRAIN_BARB_LEN = 16.0              # Protrusion from base body OD for 1/4" ID tu
 DRAIN_BARB_SHAFT_OD = 6.5          # Fits standard 1/4" (6.35 mm) ID silicone tubing
 DRAIN_BARB_RIB_OD = 7.4            # Retention barb ridge OD
 
+# Annular Condensation Gutter & 2nd Drain Spout (separates wall condensation from leachate)
+WEIR_R_IN = 37.0                   # Circular divider dam ID (outside candle & scan)
+WEIR_R_OUT = 39.0                  # Circular divider dam OD
+WEIR_TOP_Z = 51.0                  # Dam crest (+1 mm inside tube ID to isolate gutter)
+GUTTER_R_OUT = 42.5                # Flush with acrylic tube ID (85 mm)
+GUTTER_FLOOR_Z = 45.0              # Gutter floor (0.76 mm solid wall under Z_TUBE_SEAT)
+COND_DRAIN_ANGLE_DEG = 135.0       # Solid pillar between 75 deg syringe & 180 deg ESP32
+COND_DRAIN_CENTER_Z = GUTTER_FLOOR_Z + DRAIN_BORE_DIA / 2.0  # 47.25 mm at R=40.75 mm
+
 # Base Electronics / Sensor Bays (3x smooth arched cutouts hugging the funnel)
 BAY_ARCH_ANGLES_DEG = (75.0, 180.0, 285.0)  # Leaves +/- 37 deg solid around 0 deg drain
 BAY_ARCH_RADIUS = 30.0             # 60 mm wide x 30 mm tall smooth arch (Z = 4 to 34 mm)
@@ -90,6 +99,7 @@ COLL_CLIP_SPACING = 32.0           # Center-to-center spacing of the 2 clips
 COLL_CRADLE_ANGLE_DEG = 75.0       # Centered along the 75 deg arched bay
 COLL_CRADLE_R = 47.5               # 6.5 mm (~2/3 cm) inward, flush with 114 mm foot rim
 COLL_CRADLE_Z = 14.0               # Syringe centerline height off table
+COND_CRADLE_R = 71.0               # Parallel outer 10 mL condensation syringe at 75 deg
 
 # ==============================================================================
 # 9. Compact Center Syringe-Cage Lid Variant (Holds 50 mL Syringe Shaft)
