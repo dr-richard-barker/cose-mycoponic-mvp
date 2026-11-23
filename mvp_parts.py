@@ -15,6 +15,7 @@ import math
 from build123d import (
     Align,
     Box,
+    BuildSketch,
     Circle,
     Cone,
     Cylinder,
@@ -836,15 +837,15 @@ def mvp_syringe_cage_snap_falcon_funnel():
     ) - luer_taper
 
     # 4. 3-strut syringe cage rising directly off the Ø39.5 mm funnel belly (2x height = 110 mm)
-    # with an extended Gothic lancet arch (~40.6 mm tall) & slim ~4 mm curved ribs under top ring
+    # with 45 mm extended Gothic lancet arches & spandrel cutouts via Plane.YZ
     z_cage_start = z0 + 24.25
     cage_h = p.CAGE_HEIGHT * 2.0
     z_top_ring = z_cage_start + cage_h - p.CAGE_RING_HEIGHT
 
-    a = 15.8
-    k = 2.8
+    a = 14.2
+    k = 4.52
     r_arc = (1.0 + k) * a
-    arch_h = math.sqrt(r_arc**2 - (k * a) ** 2)  # ~40.6 mm tall extended Gothic lancet arch
+    arch_h = math.sqrt(r_arc**2 - (k * a) ** 2)  # 45.0 mm tall extended Gothic lancet arch
     z_skirt = z_top_ring - arch_h
 
     ring_wall = _tube(r_in, r_out, p.CAGE_RING_HEIGHT + arch_h, z_skirt)
@@ -856,7 +857,7 @@ def mvp_syringe_cage_snap_falcon_funnel():
         )
         cage = cage + rib
 
-    # Cut 3 tall extended Gothic lancet windows (0/120/240 deg)
+    # Cut 3 tall extended Gothic lancet windows (0/120/240 deg) cleanly through r_in..r_out
     pts = [(-a, -0.5)]
     n_seg = 16
     for i in range(n_seg + 1):
@@ -868,25 +869,27 @@ def mvp_syringe_cage_snap_falcon_funnel():
         z = math.sqrt(max(0.0, r_arc**2 - (k * a + x) ** 2))
         pts.append((x, z))
     pts.append((a, -0.5))
-    arch_prof = Polygon(*pts, align=None)
-    arch_cut_0 = Pos(r_in - 1.0, 0, z_skirt) * Rot(90, 0, 90) * extrude(arch_prof, amount=p.CAGE_WALL + 4.0)
+    with BuildSketch(Plane.YZ.offset(r_in - 1.0)) as sk_arch:
+        Polygon(*pts, align=None)
+    arch_cut_0 = Pos(0, 0, z_skirt) * extrude(sk_arch.sketch, amount=p.CAGE_WALL + 4.0)
     for win_ang in (0.0, 120.0, 240.0):
         cage = cage - (Rot(0, 0, win_ang) * arch_cut_0)
 
-    # Cut 3 tall spandrel windows above the stands (60/180/300 deg)
-    # keeping only ~4 mm slim curved Gothic arch ribs
-    spandrel_prof = Polygon(
-        (0.0, 4.0),
-        (-6.5, 16.0),
-        (-9.0, 26.0),
-        (-5.5, 34.0),
+    # Cut 3 tall pointed spandrel windows above the stands (60/180/300 deg)
+    # splitting each stand into two ~5.8+ mm curved Gothic arch ribs meeting at the top rim
+    spandrel_pts = [
+        (0.0, 5.0),
+        (-5.5, 18.0),
+        (-7.2, 30.0),
+        (-4.5, 38.5),
         (0.0, arch_h),
-        (5.5, 34.0),
-        (9.0, 26.0),
-        (6.5, 16.0),
-        align=None,
-    )
-    spandrel_cut_0 = Pos(r_in - 1.0, 0, z_skirt) * Rot(90, 0, 90) * extrude(spandrel_prof, amount=p.CAGE_WALL + 4.0)
+        (4.5, 38.5),
+        (7.2, 30.0),
+        (5.5, 18.0),
+    ]
+    with BuildSketch(Plane.YZ.offset(r_in - 1.0)) as sk_span:
+        Polygon(*spandrel_pts, align=None)
+    spandrel_cut_0 = Pos(0, 0, z_skirt) * extrude(sk_span.sketch, amount=p.CAGE_WALL + 4.0)
     for ang in wing_angles:
         cage = cage - (Rot(0, 0, ang) * spandrel_cut_0)
 
