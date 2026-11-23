@@ -6,6 +6,7 @@ and assembly interference checks via trimesh.
 """
 
 import os
+import shutil
 import sys
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -90,6 +91,19 @@ def main():
         if not ok_mesh:
             all_ok = False
         print(f"  {name:24s} | {status:22s} | vol = {vol_cm3:7.2f} cm^3")
+
+    # Sync pre-oriented Revopoint 3D scan asset (AstroMycology legacy Tube01_Raw_Mesh.ply)
+    scan_src = os.path.join(CURRENT_DIR, "assets", "mvp_mycoponics_tube_scan_ref.stl")
+    if os.path.exists(scan_src):
+        scan_dst = os.path.join(OUT_STL_DIR, "mvp_mycoponics_tube_scan_ref.stl")
+        shutil.copy2(scan_src, scan_dst)
+        scan_mesh = trimesh.load(scan_dst, force="mesh")
+        scan_r_max = float(((scan_mesh.vertices[:, 0] ** 2 + scan_mesh.vertices[:, 1] ** 2) ** 0.5).max())
+        scan_z_min, scan_z_max = float(scan_mesh.bounds[0][2]), float(scan_mesh.bounds[1][2])
+        scan_ok = scan_r_max < (p.TUBE_ID / 2.0) and scan_z_min > p.FUNNEL_APEX_Z and scan_z_max < p.Z_TUBE_TOP
+        if not scan_ok:
+            all_ok = False
+        print(f"  {'mvp_mycoponics_tube_scan_ref':24s} | {'OK (3D scan ref)' if scan_ok else 'FAIL (bounds)':22s} | r_max={scan_r_max:.2f} mm, Z=[{scan_z_min:.1f}, {scan_z_max:.1f}]")
 
     # Export full reference assembly STEP
     asm = Compound(children=list(solids.values()))
