@@ -836,12 +836,35 @@ def mvp_syringe_cage_snap_falcon_funnel():
     ) - luer_taper
 
     # 4. 3-strut syringe cage rising directly off the Ø39.5 mm funnel belly (2x height = 110 mm)
+    # with self-supporting curved gothic arches under both rings (zero temporary supports)
+    def _arched_cage_ring(z_ring_bottom, arch_h=18.0):
+        z_skirt = z_ring_bottom - arch_h
+        ring_wall = _tube(r_in, r_out, p.CAGE_RING_HEIGHT + arch_h, z_skirt)
+        arch_prof = Polygon(
+            (-15.5, -0.5),
+            (-15.5, 2.0),
+            (-13.0, 7.0),
+            (-8.5, 11.8),
+            (-3.5, 15.5),
+            (0.0, arch_h),
+            (3.5, 15.5),
+            (8.5, 11.8),
+            (13.0, 7.0),
+            (15.5, 2.0),
+            (15.5, -0.5),
+            align=None,
+        )
+        arch_cut_0 = Pos(0, 0, z_skirt) * Rot(90, 0, 90) * extrude(arch_prof, amount=r_out + 6.0)
+        for win_ang in (0.0, 120.0, 240.0):
+            ring_wall = ring_wall - (Rot(0, 0, win_ang) * arch_cut_0)
+        return ring_wall
+
     z_cage_start = z0 + 24.25
     cage_h = p.CAGE_HEIGHT * 2.0
     z_top_ring = z_cage_start + cage_h - p.CAGE_RING_HEIGHT
     z_mid_ring = z_cage_start + (cage_h / 2.0) - (p.CAGE_RING_HEIGHT / 2.0)
-    top_ring = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_top_ring)
-    mid_ring = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_mid_ring)
+    top_ring = _arched_cage_ring(z_top_ring)
+    mid_ring = _arched_cage_ring(z_mid_ring)
     rib_h = (z_top_ring - z_cage_start) + 2.5
     cage = top_ring + mid_ring
     for ang in wing_angles:
