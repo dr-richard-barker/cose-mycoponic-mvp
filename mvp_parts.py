@@ -836,24 +836,26 @@ def mvp_syringe_cage_snap_falcon_funnel():
     ) - luer_taper
 
     # 4. 3-strut syringe cage rising directly off the Ø39.5 mm funnel belly (2x height = 110 mm)
-    # with sleek self-supporting curved corner arches ONLY under the top ring
-    def _arched_cage_ring(z_ring_bottom, arch_h=14.0):
+    # with pointed Gothic church-window lancet arches under the top ring (no mid-height ring)
+    def _arched_cage_ring(z_ring_bottom):
+        a = 13.8
+        k = 1.6
+        r_arc = (1.0 + k) * a
+        arch_h = math.sqrt(r_arc**2 - (k * a) ** 2)  # ~28.3 mm tall pointed lancet arch
         z_skirt = z_ring_bottom - arch_h
         ring_wall = _tube(r_in, r_out, p.CAGE_RING_HEIGHT + arch_h, z_skirt)
-        arch_prof = Polygon(
-            (-16.0, -0.5),
-            (-16.0, 1.5),
-            (-13.5, 6.2),
-            (-9.0, 10.2),
-            (-4.0, 12.8),
-            (0.0, arch_h),
-            (4.0, 12.8),
-            (9.0, 10.2),
-            (13.5, 6.2),
-            (16.0, 1.5),
-            (16.0, -0.5),
-            align=None,
-        )
+        pts = [(-a, -0.5)]
+        n_seg = 16
+        for i in range(n_seg + 1):
+            x = -a + a * (i / n_seg)
+            z = math.sqrt(max(0.0, r_arc**2 - (k * a - x) ** 2))
+            pts.append((x, z))
+        for i in range(1, n_seg + 1):
+            x = a * (i / n_seg)
+            z = math.sqrt(max(0.0, r_arc**2 - (k * a + x) ** 2))
+            pts.append((x, z))
+        pts.append((a, -0.5))
+        arch_prof = Polygon(*pts, align=None)
         arch_cut_0 = Pos(0, 0, z_skirt) * Rot(90, 0, 90) * extrude(arch_prof, amount=r_out + 6.0)
         for win_ang in (0.0, 120.0, 240.0):
             ring_wall = ring_wall - (Rot(0, 0, win_ang) * arch_cut_0)
@@ -862,11 +864,9 @@ def mvp_syringe_cage_snap_falcon_funnel():
     z_cage_start = z0 + 24.25
     cage_h = p.CAGE_HEIGHT * 2.0
     z_top_ring = z_cage_start + cage_h - p.CAGE_RING_HEIGHT
-    z_mid_ring = z_cage_start + (cage_h / 2.0) - (p.CAGE_RING_HEIGHT / 2.0)
-    top_ring = _arched_cage_ring(z_top_ring, arch_h=14.0)
-    mid_ring = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_mid_ring)
+    top_ring = _arched_cage_ring(z_top_ring)
     rib_h = (z_top_ring - z_cage_start) + 2.5
-    cage = top_ring + mid_ring
+    cage = top_ring
     for ang in wing_angles:
         rib = Rot(0, 0, ang) * Pos(r_mid, 0, z_cage_start - 1.2) * Box(
             p.CAGE_WALL, 6.0, rib_h, align=(Align.CENTER, Align.CENTER, Align.MIN)
