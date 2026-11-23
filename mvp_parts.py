@@ -836,15 +836,15 @@ def mvp_syringe_cage_snap_falcon_funnel():
     ) - luer_taper
 
     # 4. 3-strut syringe cage rising directly off the Ø39.5 mm funnel belly (2x height = 110 mm)
-    # with slim (~4 mm) curved arch ribs meeting at 0/120/240 deg under the top ring
+    # with an extended Gothic lancet arch (~40.6 mm tall) & slim ~4 mm curved ribs under top ring
     z_cage_start = z0 + 24.25
     cage_h = p.CAGE_HEIGHT * 2.0
     z_top_ring = z_cage_start + cage_h - p.CAGE_RING_HEIGHT
 
-    a = 16.2
-    k = 0.262
+    a = 15.8
+    k = 2.8
     r_arc = (1.0 + k) * a
-    arch_h = math.sqrt(r_arc**2 - (k * a) ** 2)  # 20.0 mm tall wide lancet arch
+    arch_h = math.sqrt(r_arc**2 - (k * a) ** 2)  # ~40.6 mm tall extended Gothic lancet arch
     z_skirt = z_top_ring - arch_h
 
     ring_wall = _tube(r_in, r_out, p.CAGE_RING_HEIGHT + arch_h, z_skirt)
@@ -856,7 +856,7 @@ def mvp_syringe_cage_snap_falcon_funnel():
         )
         cage = cage + rib
 
-    # Cut 3 wide pointed lancet windows (0/120/240 deg)
+    # Cut 3 tall extended Gothic lancet windows (0/120/240 deg)
     pts = [(-a, -0.5)]
     n_seg = 16
     for i in range(n_seg + 1):
@@ -873,17 +873,17 @@ def mvp_syringe_cage_snap_falcon_funnel():
     for win_ang in (0.0, 120.0, 240.0):
         cage = cage - (Rot(0, 0, win_ang) * arch_cut_0)
 
-    # Cut 3 wide pointed spandrel windows above the stands (60/180/300 deg)
-    # removing excess corner plastic so only ~4 mm curved arch ribs remain
+    # Cut 3 tall spandrel windows above the stands (60/180/300 deg)
+    # keeping only ~4 mm slim curved Gothic arch ribs
     spandrel_prof = Polygon(
-        (0.0, 2.0),
-        (-7.5, 8.5),
-        (-10.0, 13.5),
-        (-6.0, 17.0),
+        (0.0, 4.0),
+        (-6.5, 16.0),
+        (-9.0, 26.0),
+        (-5.5, 34.0),
         (0.0, arch_h),
-        (6.0, 17.0),
-        (10.0, 13.5),
-        (7.5, 8.5),
+        (5.5, 34.0),
+        (9.0, 26.0),
+        (6.5, 16.0),
         align=None,
     )
     spandrel_cut_0 = Pos(r_in - 1.0, 0, z_skirt) * Rot(90, 0, 90) * extrude(spandrel_prof, amount=p.CAGE_WALL + 4.0)
