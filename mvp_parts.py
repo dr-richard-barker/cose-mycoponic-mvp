@@ -856,20 +856,21 @@ def mvp_syringe_cage_snap_falcon_funnel():
                 if t0 > 0.0
                 else theta_start + (theta_end - theta_start) * (1.0 - math.cos(t * math.pi / 2.0))
             )
-            z_sec = z_skirt + (arch_h + 1.5) * t
-            w_sec = w - 0.6 * math.sin(t * math.pi) if t0 == 0.0 else w
+            z_sec = z_skirt + (0.2 if t0 == 0.0 else 0.0) + (arch_h + 1.5) * t
+            w_sec = (w - 3.2 * math.sin(t * math.pi / 2.0)) if t0 == 0.0 else w
             secs.append(Rot(0, 0, th) * Pos(r_mid, 0, z_sec) * Rectangle(3.4, w_sec))
         return loft(secs)
 
     cage = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_top_ring)
     for ang in wing_angles:
-        leg = Rot(0, 0, ang) * Pos(r_mid, 0, z_cage_start - 1.2) * Box(
-            p.CAGE_WALL, 6.0, (z_skirt - z_cage_start) + 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
-        )
+        leg = Rot(0, 0, ang) * loft([
+            Pos(r_mid, 0, z_cage_start - 1.2) * Rectangle(3.6, 11.0),
+            Pos(r_mid, 0, z_skirt + 4.0) * Rectangle(3.6, 9.0),
+        ])
         cage = cage + leg
         for sign in (-1.0, 1.0):
-            # Primary Gothic arch rib: (ang, z_skirt) -> (ang +/- 60 deg, z_top_ring)
-            cage = cage + _loft_cage_rib(ang, ang + sign * 60.0, 0.0, 1.0, w=5.2, n_sec=8)
+            # Primary Gothic arch rib: springs at 8.4 mm inside 9.0 mm leg -> tapers to 5.2 mm at top_ring
+            cage = cage + _loft_cage_rib(ang, ang + sign * 60.0, 0.0, 1.0, w=8.4, n_sec=8)
             # Inner cross-connect arch inside empty triangle -> meets at ang (60/180/300 deg)
             t_in = 0.45
             th_in = ang + sign * 60.0 * (1.0 - math.cos(t_in * math.pi / 2.0))
@@ -881,6 +882,18 @@ def mvp_syringe_cage_snap_falcon_funnel():
 
     cage_shell = _tube(r_in, r_out, cage_h + 3.0, z_cage_start - 2.0)
     cage = cage & cage_shell
+
+    # External buttress spine ridges along outside edge of each arm, flaring into triangular base gussets
+    spine_prof = Polygon(
+        (r_mid, z0 + 20.0),
+        (25.0, z0 + 20.0),
+        (21.75, z_skirt),
+        (r_mid, z_skirt + 3.5),
+        align=None,
+    )
+    spine_0 = Rot(90, 0, 0) * extrude(spine_prof, amount=1.8, both=True)
+    for ang in wing_angles:
+        cage = cage + (Rot(0, 0, ang) * spine_0)
 
     return base + chamber + cage
 
