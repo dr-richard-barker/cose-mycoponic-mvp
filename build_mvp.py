@@ -150,6 +150,9 @@ def main():
         ("mvp_bottom_base", "mvp_candle_ref"),
         ("mvp_bottom_base_collection", "mvp_tube_ref"),
         ("mvp_bottom_base_collection", "mvp_candle_ref"),
+        ("mvp_bottom_base_collection", "mvp_syringe_10ml_ref"),
+        ("mvp_syringe_10ml_ref", "mvp_tube_ref"),
+        ("mvp_syringe_10ml_ref", "mvp_top_lid_pegs"),
         ("mvp_tube_ref", "mvp_candle_ref"),
     ]
     for a, b in pairs:

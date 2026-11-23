@@ -473,6 +473,55 @@ def _c_clip_cradle(
     return clips
 
 
+def _vertical_c_clip(
+    angle_deg: float,
+    radius_r: float,
+    z_top: float,
+    height: float,
+    bore_id: float,
+    wall: float = 3.0,
+    z_gusset: float = 31.0,
+):
+    """Build a vertical support-free snap-in C-clip attached to the curved outer base wall."""
+    r_body = p.BASE_BODY_OD / 2.0
+    r_in = bore_id / 2.0
+    r_out = r_in + wall
+    z_bot = z_top - height
+    neck_start = r_body - 2.5  # embeds into R=49 mm outer wall without entering 45.25 mm socket
+
+    # Full clip ring + radial neck over gusset..z_top, beveled underneath at ~45 deg to avoid supports
+    clip_outer = Pos(radius_r, 0, z_gusset) * Cylinder(
+        r_out, z_top - z_gusset, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    mount_neck = Pos(neck_start, 0, z_gusset) * Box(
+        radius_r - neck_start,
+        r_out * 1.4,
+        z_top - z_gusset,
+        align=(Align.MIN, Align.CENTER, Align.MIN),
+    )
+    wedge_prof = Polygon(
+        (neck_start, z_gusset),
+        (r_body, z_gusset),
+        (radius_r + r_out + 1.0, z_bot),
+        (radius_r + r_out + 1.0, z_top + 1.0),
+        (neck_start, z_top + 1.0),
+        align=None,
+    )
+    support_env = Rot(90, 0, 0) * extrude(wedge_prof, amount=r_out + 2.0, both=True)
+
+    clip_bore = Pos(radius_r, 0, z_gusset - 1.0) * Cylinder(
+        r_in, z_top - z_gusset + 2.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
+    )
+    # Radially outward snap-in slot (width = 0.84 * bore_id)
+    snap_slot = Pos(radius_r, 0, z_gusset - 1.0) * Box(
+        r_out + 4.0,
+        bore_id * 0.84,
+        z_top - z_gusset + 2.0,
+        align=(Align.MIN, Align.CENTER, Align.MIN),
+    )
+    return Rot(0, 0, angle_deg) * (((clip_outer + mount_neck) & support_env) - clip_bore - snap_slot)
+
+
 def mvp_bottom_base():
     """Standard funneling sump base with M3 Arduino holes & front air-pump clips."""
     base = _bottom_base_core(p.BAY_ARCH_ANGLES_DEG)
@@ -488,38 +537,21 @@ def mvp_bottom_base():
 
 
 def mvp_bottom_base_collection():
-    """Base variant with dual parallel 10 mL collection syringe cradles (75 deg)
+    """Base variant with dual vertical curved-wall 10 mL syringe C-clips (55 & 95 deg)
     and front Ø27.4 mm air-pump snap-in clips (285 deg).
     """
-    base = _bottom_base_core((180.0, 285.0))
-    syringe_clips = _c_clip_cradle(
-        p.COLL_CRADLE_ANGLE_DEG,
-        p.COLL_CRADLE_R,
-        p.COLL_CRADLE_Z,
-        p.COLL_SYRINGE_BARREL_ID,
-        p.COLL_CLIP_SPACING,
-        wall=p.COLL_CLIP_WALL,
-        width=p.COLL_CLIP_WIDTH,
-        snap_tilt_deg=45.0,
-    )
-    cond_syringe_clips = _c_clip_cradle(
-        p.COLL_CRADLE_ANGLE_DEG,
-        p.COND_CRADLE_R,
-        p.COLL_CRADLE_Z,
-        p.COLL_SYRINGE_BARREL_ID,
-        p.COLL_CLIP_SPACING,
-        wall=p.COLL_CLIP_WALL,
-        width=p.COLL_CLIP_WIDTH,
-        snap_tilt_deg=45.0,
-    )
-    cond_bars = None
-    for dy in (-p.COLL_CLIP_SPACING / 2.0, p.COLL_CLIP_SPACING / 2.0):
-        bar = (
-            Rot(0, 0, p.COLL_CRADLE_ANGLE_DEG)
-            * Pos(52.0, dy, 0.0)
-            * Box(21.0, p.COLL_CLIP_WIDTH, p.BASE_FOOT_HEIGHT, align=(Align.MIN, Align.CENTER, Align.MIN))
+    base = _bottom_base_core(p.BAY_ARCH_ANGLES_DEG)
+    syringe_clips = None
+    for deg in p.COLL_ANGLES_DEG:
+        one_clip = _vertical_c_clip(
+            deg,
+            p.COLL_CLIP_R,
+            p.COLL_CLIP_Z_TOP,
+            p.COLL_CLIP_HEIGHT,
+            p.COLL_SYRINGE_BARREL_ID,
+            wall=p.COLL_CLIP_WALL,
         )
-        cond_bars = bar if cond_bars is None else (cond_bars + bar)
+        syringe_clips = one_clip if syringe_clips is None else (syringe_clips + one_clip)
     pump_clips = _c_clip_cradle(
         p.PUMP_CLIP_ANGLE_DEG,
         p.PUMP_CLIP_R,
@@ -528,7 +560,7 @@ def mvp_bottom_base_collection():
         p.PUMP_CLIP_SPACING,
         snap_tilt_deg=0.0,
     )
-    return base + syringe_clips + cond_syringe_clips + cond_bars + pump_clips
+    return base + syringe_clips + pump_clips
 
 
 def mvp_port_barb_insert():
@@ -1269,16 +1301,23 @@ def mvp_cables_ref():
 
 
 def mvp_plumbing_ref():
-    """Reference solids for leachate drain tube + valve (0 deg barb to inner
-    75 deg 10 mL syringe), condensation drain tube (135 deg barb to outer
-    75 deg 10 mL syringe), and air-pump -> Falcon -> 240 deg lid tubing.
+    """Reference solids for leachate drain tube + valve (0 deg barb to vertical
+    55 deg 10 mL syringe), condensation drain tube (135 deg barb to vertical
+    95 deg 10 mL syringe), and air-pump -> Falcon -> 240 deg lid tubing.
     """
-    rad75 = math.radians(p.COLL_CRADLE_ANGLE_DEG)
-    # 1. Primary bottom leachate drain tube + inline mini ball valve
-    syr_x = p.COLL_CRADLE_R * math.cos(rad75) - (-48.0 * math.sin(rad75))
-    syr_y = p.COLL_CRADLE_R * math.sin(rad75) + (-48.0 * math.cos(rad75))
+    ang_leach, ang_cond = p.COLL_ANGLES_DEG
+    # 1. Primary bottom leachate drain tube + inline mini ball valve -> 55 deg vertical syringe tip
+    syr1_x = p.COLL_CLIP_R * math.cos(math.radians(ang_leach))
+    syr1_y = p.COLL_CLIP_R * math.sin(math.radians(ang_leach))
     drain_tube = _pipe(
-        [(64.0, 0.0, 8.2), (76.0, 10.0, 9.5), (74.0, 26.0, 12.0), (syr_x, syr_y, p.COLL_CRADLE_Z)],
+        [
+            (64.0, 0.0, 8.2),
+            (76.0, 10.0, 9.5),
+            (74.0, 26.0, 10.5),
+            (56.0, 46.0, 9.5),
+            (39.0, 53.0, 8.5),
+            (syr1_x, syr1_y, p.COLL_SYRINGE_TIP_Z),
+        ],
         3.2,
     )
     valve_body = Pos(75.0, 18.0, 10.8) * Rot(0, 90, 110) * Cylinder(
@@ -1288,20 +1327,21 @@ def mvp_plumbing_ref():
         18.0, 4.0, 4.0, align=(Align.CENTER, Align.CENTER, Align.CENTER)
     )
 
-    # 2. Secondary condensation gutter gravity drain tube (135 deg barb -> outer 75 deg syringe)
+    # 2. Secondary condensation gutter gravity drain tube -> 95 deg vertical syringe tip
     rad135 = math.radians(p.COND_DRAIN_ANGLE_DEG)
     barb_r = 64.0
     bx = barb_r * math.cos(rad135)
     by = barb_r * math.sin(rad135)
     bz = p.COND_DRAIN_CENTER_Z - (barb_r - 40.25) * math.tan(math.radians(p.DRAIN_SLOPE_DEG))
-    cond_syr_x = p.COND_CRADLE_R * math.cos(rad75) - (48.0 * math.sin(rad75))
-    cond_syr_y = p.COND_CRADLE_R * math.sin(rad75) + (48.0 * math.cos(rad75))
+    syr2_x = p.COLL_CLIP_R * math.cos(math.radians(ang_cond))
+    syr2_y = p.COLL_CLIP_R * math.sin(math.radians(ang_cond))
     cond_drain_tube = _pipe(
         [
             (bx, by, bz),
-            (-51.0, 53.0, 39.0),
-            (-44.0, 72.0, 24.0),
-            (cond_syr_x, cond_syr_y, p.COLL_CRADLE_Z),
+            (-48.0, 55.0, 35.0),
+            (-30.0, 66.0, 20.0),
+            (-10.0, 64.0, 9.0),
+            (syr2_x, syr2_y, p.COLL_SYRINGE_TIP_Z),
         ],
         3.2,
     )
@@ -1414,26 +1454,20 @@ def mvp_syringe_50ml_ref():
 
 
 def mvp_syringe_10ml_ref():
-    """Reference solids for dual 10 mL collection syringes snapped into the base C-clips."""
+    """Reference solids for dual 10 mL collection syringes hanging vertically
+    (tip-down) in the curved-wall base C-clips at 55 deg & 95 deg.
+    """
+    z0 = p.COLL_SYRINGE_TIP_Z
 
-    def _syringe_at(cradle_r: float, y_sign: float):
-        rot_x = -90.0 if y_sign > 0.0 else 90.0
-        tip = Pos(cradle_r, -48.0 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
-            2.1, 9.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
-        )
-        barrel = Pos(cradle_r, -39.0 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
-            8.0, 82.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
-        )
-        flange = Pos(cradle_r, 43.0 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
-            15.0, 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
-        )
-        plunger = Pos(cradle_r, 45.0 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
-            4.0, 22.0, align=(Align.CENTER, Align.CENTER, Align.MIN)
-        )
-        thumb = Pos(cradle_r, 66.5 * y_sign, p.COLL_CRADLE_Z) * Rot(rot_x, 0, 0) * Cylinder(
-            9.0, 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
-        )
-        return Rot(0, 0, p.COLL_CRADLE_ANGLE_DEG) * (tip + barrel + flange + plunger + thumb)
+    def _vertical_syringe(angle_deg: float):
+        sx = p.COLL_CLIP_R * math.cos(math.radians(angle_deg))
+        sy = p.COLL_CLIP_R * math.sin(math.radians(angle_deg))
+        tip = Pos(sx, sy, z0) * Cylinder(2.1, 9.5, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        barrel = Pos(sx, sy, z0 + 9.0) * Cylinder(8.0, 82.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        flange = Pos(sx, sy, z0 + 91.0) * Cylinder(15.0, 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        plunger = Pos(sx, sy, z0 + 93.0) * Cylinder(4.0, 22.0, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        thumb = Pos(sx, sy, z0 + 114.5) * Cylinder(9.0, 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN))
+        return tip + barrel + flange + plunger + thumb
 
-    # Inner leachate syringe: tip toward -Y (0 deg barb); outer condensation syringe: tip toward +Y (135 deg barb)
-    return _syringe_at(p.COLL_CRADLE_R, 1.0) + _syringe_at(p.COND_CRADLE_R, -1.0)
+    ang1, ang2 = p.COLL_ANGLES_DEG
+    return _vertical_syringe(ang1) + _vertical_syringe(ang2)

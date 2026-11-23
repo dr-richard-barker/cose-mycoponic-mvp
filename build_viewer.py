@@ -14,7 +14,7 @@ OUT_HTML = os.path.join(CURRENT_DIR, "mvp_assembly_viewer.html")
 
 PARTS_META = [
     ("mvp_bottom_base", "Bottom Base (Standard Arched Bays)", "#3b82f6", 1.0, 0.0),
-    ("mvp_bottom_base_collection", "Bottom Base (10 mL Syringe Holder)", "#60a5fa", 1.0, 0.0),
+    ("mvp_bottom_base_collection", "Bottom Base (Vertical 10 mL Clips)", "#60a5fa", 1.0, 0.0),
     ("mvp_tube_ref", "Clear Acrylic Tube (85x90x100 mm)", "#67e8f9", 0.28, 1.0),
     ("mvp_top_lid", "Top Lid (Standard Slide-On)", "#10b981", 1.0, 2.0),
     ("mvp_top_lid_pegs", "Top Lid (Upward Alignment Pegs)", "#34d399", 1.0, 2.0),
@@ -36,7 +36,7 @@ PARTS_META = [
     ("mvp_candle_ref", "4-in Ceramic Filter Candle", "#e2e8f0", 1.0, 3.0),
     ("mvp_mycoponics_tube_scan_ref", "Mycoponics Tube (Revopoint 3D Scan)", "#d97706", 0.92, 3.0),
     ("mvp_syringe_50ml_ref", "50 mL Nutrient Feed Syringe", "#bae6fd", 0.42, 4.0),
-    ("mvp_syringe_10ml_ref", "10 mL Collection Syringe", "#bae6fd", 0.42, 0.0),
+    ("mvp_syringe_10ml_ref", "Dual 10 mL Collection Syringes (Vertical)", "#bae6fd", 0.42, 0.0),
     ("mvp_falcon_50ml_ref", "50 mL Falcon Humidifier Tube", "#7dd3fc", 0.40, 2.2),
     ("mvp_electronics_ref", "ESP32, Relay, Air Pump & 5V PSU", "#a855f7", 1.0, 0.0),
     ("mvp_sensor_probe_ref", "SHT30 Temp/RH Probe & Cable", "#eab308", 1.0, 1.5),

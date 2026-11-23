@@ -90,16 +90,15 @@ ARDUINO_HOLE_RADII = (28.0, 44.0)  # Radial positions of M3 hole pairs
 ARDUINO_HOLE_Y_OFFSET = 12.7       # +/- 12.7 mm (25.4 mm / 1.0 in spacing)
 
 # ==============================================================================
-# 8. Collection Base Variant (10 mL Syringe Snap-In C-Clip Cradle)
+# 8. Collection Base Variant (Dual Vertical 10 mL Syringe Snap-In C-Clips)
 # ==============================================================================
 COLL_SYRINGE_BARREL_ID = 16.4      # Snap-fit for standard 10 mL syringe (~16.0 mm OD)
-COLL_CLIP_WALL = 3.0               # C-clip wall thickness
-COLL_CLIP_WIDTH = 10.0             # Width of each C-clip along syringe axis
-COLL_CLIP_SPACING = 32.0           # Center-to-center spacing of the 2 clips
-COLL_CRADLE_ANGLE_DEG = 75.0       # Centered along the 75 deg arched bay
-COLL_CRADLE_R = 47.5               # 6.5 mm (~2/3 cm) inward, flush with 114 mm foot rim
-COLL_CRADLE_Z = 14.0               # Syringe centerline height off table
-COND_CRADLE_R = 71.0               # Parallel outer 10 mL condensation syringe at 75 deg
+COLL_CLIP_WALL = 3.0               # C-clip wall thickness (22.4 mm OD)
+COLL_CLIP_HEIGHT = 20.0            # Vertical grip height (Z = 42.0..62.0 mm, flush with Z_BASE_TOP)
+COLL_CLIP_Z_TOP = Z_BASE_TOP       # 62.0 mm
+COLL_ANGLES_DEG = (55.0, 95.0)     # Symmetrical around 75 deg bay; beside 0 deg & 135 deg spouts
+COLL_CLIP_R = 61.0                 # Syringe centerline radius (clears Ø90 tube & Ø98 base wall)
+COLL_SYRINGE_TIP_Z = 14.0          # Bottom tip height of vertical tip-down 10 mL syringe
 
 # ==============================================================================
 # 9. Compact Center Syringe-Cage Lid Variant (Holds 50 mL Syringe Shaft)
