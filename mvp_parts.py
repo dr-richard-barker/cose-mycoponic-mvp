@@ -839,12 +839,27 @@ def mvp_syringe_cage_snap_falcon_funnel():
     ) - luer_taper
 
     # 4. 3-strut syringe cage rising directly off the Ø39.5 mm funnel belly (2x height = 110 mm)
-    # with additive NURBS-lofted 3-arch Gothic crown (zero bottom drop-offs, <= 32 deg overhang)
+    # with intersecting Gothic tracery cross-arches (12 top-ring supports, <= 32 deg overhang)
     z_cage_start = z0 + 24.25
     cage_h = p.CAGE_HEIGHT * 2.0
     z_top_ring = z_cage_start + cage_h - p.CAGE_RING_HEIGHT
     arch_h = 48.0
     z_skirt = z_top_ring - arch_h
+
+    def _loft_cage_rib(theta_start, theta_end, t0, t1, w=3.8, n_sec=6):
+        secs = []
+        for i in range(n_sec + 1):
+            u = i / n_sec
+            t = t0 + (t1 - t0) * u
+            th = (
+                theta_start + (theta_end - theta_start) * math.sin(u * math.pi / 2.0)
+                if t0 > 0.0
+                else theta_start + (theta_end - theta_start) * (1.0 - math.cos(t * math.pi / 2.0))
+            )
+            z_sec = z_skirt + (arch_h + 1.5) * t
+            w_sec = w - 0.6 * math.sin(t * math.pi) if t0 == 0.0 else w
+            secs.append(Rot(0, 0, th) * Pos(r_mid, 0, z_sec) * Rectangle(3.4, w_sec))
+        return loft(secs)
 
     cage = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_top_ring)
     for ang in wing_angles:
@@ -853,15 +868,16 @@ def mvp_syringe_cage_snap_falcon_funnel():
         )
         cage = cage + leg
         for sign in (-1.0, 1.0):
-            sections = []
-            n_sec = 8
-            for i in range(n_sec + 1):
-                t = i / n_sec
-                theta_deg = ang + sign * 60.0 * (1.0 - math.cos(t * math.pi / 2.0))
-                z_sec = z_skirt + (arch_h + 1.5) * t
-                w_sec = 5.6 - 1.0 * math.sin(t * math.pi)
-                sections.append(Rot(0, 0, theta_deg) * Pos(r_mid, 0, z_sec) * Rectangle(3.4, w_sec))
-            cage = cage + loft(sections)
+            # Primary Gothic arch rib: (ang, z_skirt) -> (ang +/- 60 deg, z_top_ring)
+            cage = cage + _loft_cage_rib(ang, ang + sign * 60.0, 0.0, 1.0, w=5.2, n_sec=8)
+            # Inner cross-connect arch inside empty triangle -> meets at ang (60/180/300 deg)
+            t_in = 0.45
+            th_in = ang + sign * 60.0 * (1.0 - math.cos(t_in * math.pi / 2.0))
+            cage = cage + _loft_cage_rib(th_in, ang, t_in, 1.0, w=3.8)
+            # Outer cross-connect branch crisscrossing inner arch -> meets at ang +/- 30 deg
+            t_out = 0.35
+            th_out = ang + sign * 60.0 * (1.0 - math.cos(t_out * math.pi / 2.0))
+            cage = cage + _loft_cage_rib(th_out, ang + sign * 30.0, t_out, 1.0, w=3.8)
 
     cage_shell = _tube(r_in, r_out, cage_h + 3.0, z_cage_start - 2.0)
     cage = cage & cage_shell
