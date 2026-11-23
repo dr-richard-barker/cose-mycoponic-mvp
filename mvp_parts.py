@@ -140,14 +140,14 @@ def mvp_top_lid():
 
 
 def mvp_top_lid_pegs():
-    """Standard slide-on top lid with 3x upward alignment pegs (Ø13.8 mm x 11.4 mm
+    """Standard slide-on top lid with 3x upward alignment pegs (Ø13.8 mm x 22.8 mm
     above Z_LID_TOP) at 60/180/300 deg that mate into the Ø14.2 mm wing holes of
     mvp_syringe_cage_snap_falcon_funnel.
     """
     lid = mvp_top_lid()
     peg_r = (p.SYRINGE_PILLAR_DIA - 0.2) / 2.0  # 6.9 mm (Ø13.8 mm)
     peg_z0 = p.Z_LID_TOP - 5.0  # anchor 0.5 mm into the 4.5 mm socket floor
-    peg_h = 5.0 + (3.8 * 3.0)  # protrudes 11.4 mm (3x) above Z_LID_TOP through 4.0 mm wing
+    peg_h = 5.0 + 22.8  # protrudes 22.8 mm (2x previous 11.4 mm) above Z_LID_TOP
     for deg in (60.0, 180.0, 300.0):
         sx = p.SYRINGE_PILLAR_RING_R * math.cos(math.radians(deg))
         sy = p.SYRINGE_PILLAR_RING_R * math.sin(math.radians(deg))
