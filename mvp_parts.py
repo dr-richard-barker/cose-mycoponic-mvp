@@ -24,10 +24,12 @@ from build123d import (
     Plane,
     Polygon,
     Pos,
+    Rectangle,
     Rot,
     Spline,
     chamfer,
     extrude,
+    loft,
     sweep,
 )
 
@@ -837,61 +839,32 @@ def mvp_syringe_cage_snap_falcon_funnel():
     ) - luer_taper
 
     # 4. 3-strut syringe cage rising directly off the Ø39.5 mm funnel belly (2x height = 110 mm)
-    # with 45 mm extended Gothic lancet arches & spandrel cutouts via Plane.YZ
+    # with additive NURBS-lofted 3-arch Gothic crown (zero bottom drop-offs, <= 32 deg overhang)
     z_cage_start = z0 + 24.25
     cage_h = p.CAGE_HEIGHT * 2.0
     z_top_ring = z_cage_start + cage_h - p.CAGE_RING_HEIGHT
-
-    a = 14.2
-    k = 4.52
-    r_arc = (1.0 + k) * a
-    arch_h = math.sqrt(r_arc**2 - (k * a) ** 2)  # 45.0 mm tall extended Gothic lancet arch
+    arch_h = 48.0
     z_skirt = z_top_ring - arch_h
 
-    ring_wall = _tube(r_in, r_out, p.CAGE_RING_HEIGHT + arch_h, z_skirt)
-    rib_h = (z_top_ring - z_cage_start) + 2.5
-    cage = ring_wall
+    cage = _tube(r_in, r_out, p.CAGE_RING_HEIGHT, z_top_ring)
     for ang in wing_angles:
-        rib = Rot(0, 0, ang) * Pos(r_mid, 0, z_cage_start - 1.2) * Box(
-            p.CAGE_WALL, 6.0, rib_h, align=(Align.CENTER, Align.CENTER, Align.MIN)
+        leg = Rot(0, 0, ang) * Pos(r_mid, 0, z_cage_start - 1.2) * Box(
+            p.CAGE_WALL, 6.0, (z_skirt - z_cage_start) + 2.5, align=(Align.CENTER, Align.CENTER, Align.MIN)
         )
-        cage = cage + rib
+        cage = cage + leg
+        for sign in (-1.0, 1.0):
+            sections = []
+            n_sec = 8
+            for i in range(n_sec + 1):
+                t = i / n_sec
+                theta_deg = ang + sign * 60.0 * (1.0 - math.cos(t * math.pi / 2.0))
+                z_sec = z_skirt + (arch_h + 1.5) * t
+                w_sec = 5.6 - 1.0 * math.sin(t * math.pi)
+                sections.append(Rot(0, 0, theta_deg) * Pos(r_mid, 0, z_sec) * Rectangle(3.4, w_sec))
+            cage = cage + loft(sections)
 
-    # Cut 3 tall extended Gothic lancet windows (0/120/240 deg) cleanly through r_in..r_out
-    pts = [(-a, -0.5)]
-    n_seg = 16
-    for i in range(n_seg + 1):
-        x = -a + a * (i / n_seg)
-        z = math.sqrt(max(0.0, r_arc**2 - (k * a - x) ** 2))
-        pts.append((x, z))
-    for i in range(1, n_seg + 1):
-        x = a * (i / n_seg)
-        z = math.sqrt(max(0.0, r_arc**2 - (k * a + x) ** 2))
-        pts.append((x, z))
-    pts.append((a, -0.5))
-    with BuildSketch(Plane.YZ.offset(r_in - 1.0)) as sk_arch:
-        Polygon(*pts, align=None)
-    arch_cut_0 = Pos(0, 0, z_skirt) * extrude(sk_arch.sketch, amount=p.CAGE_WALL + 4.0)
-    for win_ang in (0.0, 120.0, 240.0):
-        cage = cage - (Rot(0, 0, win_ang) * arch_cut_0)
-
-    # Cut 3 tall pointed spandrel windows above the stands (60/180/300 deg)
-    # splitting each stand into two ~5.8+ mm curved Gothic arch ribs meeting at the top rim
-    spandrel_pts = [
-        (0.0, 5.0),
-        (-5.5, 18.0),
-        (-7.2, 30.0),
-        (-4.5, 38.5),
-        (0.0, arch_h),
-        (4.5, 38.5),
-        (7.2, 30.0),
-        (5.5, 18.0),
-    ]
-    with BuildSketch(Plane.YZ.offset(r_in - 1.0)) as sk_span:
-        Polygon(*spandrel_pts, align=None)
-    spandrel_cut_0 = Pos(0, 0, z_skirt) * extrude(sk_span.sketch, amount=p.CAGE_WALL + 4.0)
-    for ang in wing_angles:
-        cage = cage - (Rot(0, 0, ang) * spandrel_cut_0)
+    cage_shell = _tube(r_in, r_out, cage_h + 3.0, z_cage_start - 2.0)
+    cage = cage & cage_shell
 
     return base + chamber + cage
 
